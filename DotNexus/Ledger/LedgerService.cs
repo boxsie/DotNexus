@@ -124,7 +124,8 @@ namespace DotNexus.Ledger
             var request = new NexusRequest(new Dictionary<string, string>
             {
                 {key, val},
-                {"verbose", ((int) txVerbosity).ToString()}
+                {"verbose", ((int) txVerbosity).ToString()},
+                {"count", count.ToString()}
             });
 
             return await GetAsync<IEnumerable<Block>>("ledger/blocks", request, token);

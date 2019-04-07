@@ -35,13 +35,13 @@ namespace DotNexus.Tests
         }
 
         [Fact]
-        public async Task LedgerService_GetTenBlocksFromGenesis_ReturnsTenBlocks()
+        public async Task LedgerService_GetTwentyBlocksFromGenesis_ReturnsTwentyBlocks()
         {
             var hash = await _clientFixture.LedgerService.GetBlockHashAsync(1);
 
-            var blocks = (await _clientFixture.LedgerService.GetBlocksAsync(hash, 10)).ToList();
+            var blocks = (await _clientFixture.LedgerService.GetBlocksAsync(hash, 20)).ToList();
             
-            Assert.True(blocks != null && blocks.Count == 10);
+            Assert.True(blocks != null && blocks.Count == 20);
         }
 
         [Fact]
