@@ -17,11 +17,11 @@ namespace DotNexus.Ledger
         public LedgerService(ILogger log, HttpClient client, string connectionString)
             : base(log, client, connectionString) { }
 
-        public async Task<string> GetBlockHash(int height, CancellationToken token = default(CancellationToken))
+        public async Task<string> GetBlockHashAsync(int height, CancellationToken token = default(CancellationToken))
         {
             token.ThrowIfCancellationRequested();
 
-            if (height > 0)
+            if (height <= 0)
                 throw new Exception("Height must be greater than 0");
 
             var request = new NexusRequest(new Dictionary<string, string>
@@ -29,7 +29,9 @@ namespace DotNexus.Ledger
                 {"height", height.ToString()}
             });
 
-            return await GetAsync<string>("ledger/blockhash", request, token);
+            var block = await GetAsync<Block>("ledger/blockhash", request, token);
+
+            return block.Hash;
         }
 
         public async Task<Block> GetBlockAsync(string hash, TxVerbosity txVerbosity = TxVerbosity.PubKeySign,
@@ -48,7 +50,7 @@ namespace DotNexus.Ledger
         {
             token.ThrowIfCancellationRequested();
 
-            if (height > 0)
+            if (height <= 0)
                 throw new Exception("Height must be greater than 0");
 
             return await GetBlockAsync((object) height, txVerbosity, token);
@@ -70,7 +72,7 @@ namespace DotNexus.Ledger
         {
             token.ThrowIfCancellationRequested();
 
-            if (height > 0)
+            if (height <= 0)
                 throw new Exception("Height must be greater than 0");
 
             return await GetBlocks(height, count, txVerbosity, token);

@@ -38,7 +38,7 @@ namespace DotNexus.Account
             return await GetAsync<Tx>("accounts/create", request, token);
         }
 
-        public async Task<GenesisId> LoginAsync(NexusUser user, CancellationToken token = default(CancellationToken))
+        public async Task<NexusUser> LoginAsync(NexusUser user, CancellationToken token = default(CancellationToken))
         {
             token.ThrowIfCancellationRequested();
 
@@ -54,7 +54,11 @@ namespace DotNexus.Account
             if (user.Pin > 0)
                 param.Add("pin", user.Pin.ToString());
 
-            return await GetAsync<GenesisId>("accounts/login", new NexusRequest(param), token);
+            var genesisId = await GetAsync<GenesisId>("accounts/login", new NexusRequest(param), token);
+
+            user.GenesisId = genesisId ?? throw new Exception($"{user.Username} login failed");
+
+            return user;
         }
 
         public async Task<GenesisId> LogoutAsync(string sessionId = null, CancellationToken token = default(CancellationToken))
@@ -113,7 +117,7 @@ namespace DotNexus.Account
         {
             token.ThrowIfCancellationRequested();
 
-            if (nexusUser.GenesisId == null || string.IsNullOrWhiteSpace(nexusUser.GenesisId.Genesis) || string.IsNullOrWhiteSpace(nexusUser.Username))
+            if (string.IsNullOrWhiteSpace(nexusUser.Username) && string.IsNullOrWhiteSpace(nexusUser?.GenesisId.Genesis))
                 throw new Exception("A valid genesis ID or username is required to retrieve transactions");
 
             var useGenesis = nexusUser.GenesisId != null;

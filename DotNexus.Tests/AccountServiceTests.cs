@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DotNexus.Account.Models;
+using DotNexus.Assets.Models;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -12,13 +13,6 @@ namespace DotNexus.Tests
         private readonly NexusServiceFixture _clientFixture;
         private readonly ITestOutputHelper _output;
 
-        private readonly NexusUser _user = new NexusUser
-        {
-            Username = "dotnettest",
-            Password = "password1",
-            Pin = 1234
-        };
-
         public AccountServiceTests(NexusServiceFixture clientFixture, ITestOutputHelper output)
         {
             _clientFixture = clientFixture;
@@ -26,10 +20,11 @@ namespace DotNexus.Tests
 
             _clientFixture.Configure(_output);
         }
+
         [Fact]
         public async Task AccountService_CreateAccount_ReturnsGenesisTx()
         {
-            var genesisTx = await _clientFixture.AccountService.CreateAccountAsync(_user);
+            var genesisTx = await _clientFixture.AccountService.CreateAccountAsync(_clientFixture.GetUser());
 
             Assert.True(!string.IsNullOrWhiteSpace(genesisTx.Hash));
         }
@@ -37,53 +32,33 @@ namespace DotNexus.Tests
         [Fact]
         public async Task AccountService_LoginLogout_AccountLogsOut()
         {
-            var genesisId = await _clientFixture.AccountService.LoginAsync(_user);
+            var nexusUser = await _clientFixture.AccountService.LoginAsync(_clientFixture.GetUser());
 
-            var logoutGenesis = await _clientFixture.AccountService.LogoutAsync(genesisId.Session);
+            var logoutGenesis = await _clientFixture.AccountService.LogoutAsync(nexusUser.GenesisId.Session);
 
             Assert.True(logoutGenesis != null && !string.IsNullOrWhiteSpace(logoutGenesis.Genesis));
         }
 
         [Fact]
-        public async Task AccountService_LoginLockUnlockLogout_AccountLocksAndUnlocks()
+        public async Task AccountService_LoginLogout_AccountLogsInAndLogsOut()
         {
-            var genesisId = await _clientFixture.AccountService.LoginAsync(_user);
+            var nexusUser = await _clientFixture.AccountService.LoginAsync(_clientFixture.GetUser());
 
-            if (genesisId == null || string.IsNullOrWhiteSpace(genesisId.Genesis))
+            if (nexusUser?.GenesisId == null || string.IsNullOrWhiteSpace(nexusUser.GenesisId.Genesis))
             {
                 _output.WriteLine("Account login failed");
                 Assert.True(false);
                 return;
             }
 
-            if (await _clientFixture.AccountService.LockAsync(genesisId.Session))
-            {
-                _output.WriteLine("Account is locked");
-
-                if (await _clientFixture.AccountService.UnlockAsync(genesisId.Session, _user.Pin))
-                {
-                    _output.WriteLine("Account is unlocked");
-                    Assert.True(true);
-                }
-                else
-                {
-                    _output.WriteLine("Account unlock failed");
-                    Assert.True(false);
-                }
-            }
-            else
-            {
-                _output.WriteLine("Account lock failed");
-                Assert.True(false);
-            }
-
-            await _clientFixture.AccountService.LogoutAsync(genesisId.Session);
+            await _clientFixture.AccountService.LogoutAsync(nexusUser.GenesisId.Session);
+            Assert.True(true);
         }
 
         [Fact]
         public async Task AccountService_GetTransactionsByUsername_ReturnsTransactions()
         {
-            var transactions = await _clientFixture.AccountService.GetTransactionsAsync(_user);
+            var transactions = await _clientFixture.AccountService.GetTransactionsAsync(_clientFixture.GetUser());
 
             Assert.True(transactions != null);
         }
@@ -91,10 +66,7 @@ namespace DotNexus.Tests
         [Fact]
         public async Task AccountService_GetTransactionsByGenesis_ReturnsTransactions()
         {
-            var user = new NexusUser
-            {
-                GenesisId = await _clientFixture.AccountService.LoginAsync(_user)
-            };
+            var user = await _clientFixture.AccountService.LoginAsync(_clientFixture.GetUser());
 
             var transactions = await _clientFixture.AccountService.GetTransactionsAsync(user);
 

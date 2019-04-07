@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DotNexus.Account;
 using DotNexus.Account.Models;
+using DotNexus.Assets;
 
 namespace DotNexus.Identity
 {
@@ -37,9 +38,7 @@ namespace DotNexus.Identity
             if (user?.Username == null)
                 throw new ArgumentNullException(nameof(user));
 
-            user.GenesisId = await _accountService.LoginAsync(user, token);
-
-            return user;
+            return await _accountService.LoginAsync(user, token);
         }
 
         public async Task<NexusUser> LogoutAsync(NexusUser user, CancellationToken token = default(CancellationToken))
