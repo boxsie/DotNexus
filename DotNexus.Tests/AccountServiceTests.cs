@@ -24,15 +24,15 @@ namespace DotNexus.Tests
         [Fact]
         public async Task AccountService_CreateAccount_ReturnsGenesisTx()
         {
-            var genesisTx = await _clientFixture.AccountService.CreateAccountAsync(_clientFixture.GetUser());
+            var user = await _clientFixture.AccountService.CreateAccountAsync(NexusServiceFixture.GetRandomUser());
 
-            Assert.True(!string.IsNullOrWhiteSpace(genesisTx.Hash));
+            Assert.True(!string.IsNullOrWhiteSpace(user?.GenesisId?.Genesis));
         }
 
         [Fact]
         public async Task AccountService_LoginLogout_AccountLogsOut()
         {
-            var nexusUser = await _clientFixture.AccountService.LoginAsync(_clientFixture.GetUser());
+            var nexusUser = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.User);
 
             var logoutGenesis = await _clientFixture.AccountService.LogoutAsync(nexusUser.GenesisId.Session);
 
@@ -42,7 +42,7 @@ namespace DotNexus.Tests
         [Fact]
         public async Task AccountService_LoginLogout_AccountLogsInAndLogsOut()
         {
-            var nexusUser = await _clientFixture.AccountService.LoginAsync(_clientFixture.GetUser());
+            var nexusUser = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.User);
 
             if (nexusUser?.GenesisId == null || string.IsNullOrWhiteSpace(nexusUser.GenesisId.Genesis))
             {
@@ -58,7 +58,7 @@ namespace DotNexus.Tests
         [Fact]
         public async Task AccountService_GetTransactionsByUsername_ReturnsTransactions()
         {
-            var transactions = await _clientFixture.AccountService.GetTransactionsAsync(_clientFixture.GetUser());
+            var transactions = await _clientFixture.AccountService.GetTransactionsAsync(NexusServiceFixture.User);
 
             Assert.True(transactions != null);
         }
@@ -66,7 +66,7 @@ namespace DotNexus.Tests
         [Fact]
         public async Task AccountService_GetTransactionsByGenesis_ReturnsTransactions()
         {
-            var user = await _clientFixture.AccountService.LoginAsync(_clientFixture.GetUser());
+            var user = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.User);
 
             var transactions = await _clientFixture.AccountService.GetTransactionsAsync(user);
 

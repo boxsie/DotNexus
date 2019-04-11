@@ -10,15 +10,25 @@ using NLog;
 
 namespace DotNexus.Core
 {
+    public class NexusServiceSettings
+    {
+        public bool ApiSessions { get; set; }
+        public bool IndexHeight { get; set; }
+    }
+
     public abstract class NexusService
     {
-        private readonly ILogger _log;
+        protected readonly ILogger Log;
+        protected readonly NexusServiceSettings ServiceSettings;
+
         private readonly HttpClient _client;
         private readonly JsonSerializerSettings _settings;
 
-        protected NexusService(ILogger log, HttpClient client, string connectionString)
+        protected NexusService(ILogger log, HttpClient client, string connectionString, NexusServiceSettings serviceSettings)
         {
-            _log = log;
+            Log = log;
+            ServiceSettings = serviceSettings;
+
             _client = ConfigureHttpClient(client, connectionString);
 
             _settings = new JsonSerializerSettings
@@ -27,18 +37,20 @@ namespace DotNexus.Core
                 ContractResolver = new LowercaseContractResolver()
             };
         }
-
+        
         protected async Task<T> GetAsync<T>(string path, NexusRequest request, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             var requestName = typeof(T).Name;
             var logHeader = $"API GET {path}:";
-
+            
             try
             {
                 if (path == null)
                 {
-                    _log.Error($"Path is missing for '{requestName}' get request");
-                    return default(T);
+                    Log.Error($"Path is missing for '{requestName}' get request");
+                    return default;
                 }
 
                 if (path[0] == '/')
@@ -46,32 +58,32 @@ namespace DotNexus.Core
                 
                 var getRequest = $"{path}{(request != null ? $"?{request.GetParamString()}" : "")}";
 
-                _log.Info($"{logHeader} {getRequest}");
+                Log.Info($"{logHeader} {getRequest}");
 
-                var httpResponseMessage = await _client.GetAsync(getRequest, token);
-                var responseJson = await httpResponseMessage.Content.ReadAsStringAsync();
+                var httpResponseMessage = await _client.GetAsync(getRequest, token).ConfigureAwait(false);
+                var responseJson = await httpResponseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<NexusResponse<T>>(responseJson, _settings);
 
                 if (httpResponseMessage.IsSuccessStatusCode)
                 {
-                    _log.Info($"{logHeader} SUCCESS");
-                    _log.Info($"{logHeader} {JsonConvert.SerializeObject(result.Result)}");
+                    Log.Info($"{logHeader} SUCCESS");
+                    Log.Info($"{logHeader} {JsonConvert.SerializeObject(result.Result)}");
 
                     return result.Result;
                 }
 
-                _log.Error($"{logHeader} FAILED");
-                _log.Error($"{logHeader} {httpResponseMessage.StatusCode} {(result.Error != null ? $"From Nexus->'{result.Error.Code} - {result.Error.Message}'" : responseJson)}");
+                Log.Error($"{logHeader} FAILED");
+                Log.Error($"{logHeader} {httpResponseMessage.StatusCode} {(result.Error != null ? $"From Nexus->'{result.Error.Code} - {result.Error.Message}'" : responseJson)}");
 
-                return default(T);
+                return default;
             }
             catch (Exception e)
             {
-                _log.Error($"{logHeader} FAILED");
-                _log.Error(e.Message);
-                _log.Error(e.StackTrace);
+                Log.Error($"{logHeader} FAILED");
+                Log.Error(e.Message);
+                Log.Error(e.StackTrace);
 
-                return default(T);
+                return default;
             }
         }
 

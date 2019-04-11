@@ -20,15 +20,7 @@ namespace DotNexus.Identity
         {
             token.ThrowIfCancellationRequested();
 
-            if (user == null)
-                throw new ArgumentNullException(nameof(user));
-
-            var tx = await _accountService.CreateAccountAsync(user, token);
-
-            if (tx != null && !string.IsNullOrWhiteSpace(tx.Genesis))
-                user.GenesisId = new GenesisId { Genesis = tx.Genesis };
-
-            return user;
+            return await _accountService.CreateAccountAsync(user, token);
         }
 
         public async Task<NexusUser> LoginAsync(NexusUser user, CancellationToken token = default(CancellationToken))
