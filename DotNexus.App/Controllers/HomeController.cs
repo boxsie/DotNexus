@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DotNexus.App.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly IUserManager _userManager;
@@ -18,13 +19,9 @@ namespace DotNexus.App.Controllers
 
         public async Task<IActionResult> Index()
         {
-            if (!User.Identity.IsAuthenticated)
-                return RedirectToAction("login", "account");
-
             return View();
         }
 
-        [Authorize]
         public IActionResult Secure()
         {
             return View();

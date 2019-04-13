@@ -24,6 +24,24 @@ namespace DotNexus.App.Controllers
         public int? Pin { get; set; }
     }
 
+    public class CreateAccountViewModel
+    {
+        [Required]
+        [DisplayName("Username")]
+        public string Username { get; set; }
+
+        [Required]
+        [DisplayName("Password")]
+        public string Password { get; set; }
+
+        [Required]
+        [DisplayName("PIN")]
+        public int? Pin { get; set; }
+
+        [DisplayName("Login immediately")]
+        public bool AutoLogin { get; set; }
+    }
+
     public class AccountController : Controller
     {
         private readonly IUserManager _userManager;
@@ -39,19 +57,54 @@ namespace DotNexus.App.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
         {
             if (!ModelState.IsValid)
                 return View(model);
 
             try
             {
-                await _userManager.SignIn(HttpContext, new NexusUserCredential
+                await _userManager.Login(HttpContext, new NexusUserCredential
                 {
                     Username = model.Username,
                     Password = model.Password,
                     Pin = model.Pin
                 });
+                
+                if (string.IsNullOrWhiteSpace(returnUrl) || !Url.IsLocalUrl(returnUrl))
+                    return RedirectToAction("index", "home");
+                else
+                    return Redirect(returnUrl);
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError("summary", e.Message);
+
+                return View(model);
+            }
+        }
+
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(CreateAccountViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            try
+            {
+                var cred = new NexusUserCredential
+                {
+                    Username = model.Username,
+                    Password = model.Password,
+                    Pin = model.Pin
+                };
+
+                await _userManager.CreateAccount(HttpContext, cred, model.AutoLogin);
 
                 return RedirectToAction("index", "home");
             }

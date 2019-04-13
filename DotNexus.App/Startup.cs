@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using DotNexus.Accounts;
 using DotNexus.Core;
 using DotNexus.Identity;
-using ElectronNET.API;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -76,6 +75,8 @@ namespace DotNexus.App
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseHsts();
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSession();
             app.UseAuthentication();
@@ -84,8 +85,6 @@ namespace DotNexus.App
             {
                 routes.MapRoute("default", "{controller=home}/{action=index}/{id?}");
             });
-            
-            Task.Run(async () => await Electron.WindowManager.CreateWindowAsync());
         }
     }
 }

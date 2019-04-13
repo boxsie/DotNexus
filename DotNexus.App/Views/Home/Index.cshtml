@@ -1,9 +1,17 @@
-﻿
+﻿@using DotNexus.Identity
+
+@inject IUserManager UserManager
+
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Index</h1>
+<div class="container-fluid">
+    @if (User.Identity.IsAuthenticated)
+    {
+        <h1>Welcome @User.Identity.Name</h1>
+    }
+</div>
 
 <a href="@Url.Action("secure")">Go secure!</a>
