@@ -5,16 +5,16 @@ namespace DotNexus.Core
 {
     public class NexusRequest
     {
-        private readonly Dictionary<string, string> _param;
+        public Dictionary<string, string> Param { get; }
 
         public NexusRequest(Dictionary<string, string> param)
         {
-            _param = param;
+            Param = param;
         }
 
         public string GetParamString()
         {
-            return string.Join('&', _param.Select(x => $"{x.Key}={x.Value}"));
+            return string.Join('&', Param.Select(x => $"{x.Key}={x.Value}"));
         }
     }
 }

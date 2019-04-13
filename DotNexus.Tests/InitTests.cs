@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using DotNexus.Account.Models;
 using DotNexus.Assets.Models;
 using Xunit;
 using Xunit.Abstractions;
@@ -20,13 +19,13 @@ namespace DotNexus.Tests
 
             _clientFixture.Configure(_output);
 
-            Task.Run(() => _clientFixture.AccountService.CreateAccountAsync(NexusServiceFixture.User));
+            Task.Run(() => _clientFixture.AccountService.CreateAccountAsync(NexusServiceFixture.UserCredential));
         }
 
         [Fact]
         public async Task InitTest_CreateFixedAccountAssetAndTokens_AllCreated()
         {
-            var user = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.User);
+            var user = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.UserCredential);
             await Task.Delay(TimeSpan.FromSeconds(5));
             var asset = await _clientFixture.AssetService.CreateAssetAsync(NexusServiceFixture.Asset, user);
             await Task.Delay(TimeSpan.FromSeconds(5));

@@ -2,8 +2,8 @@ using System;
 using System.Globalization;
 using System.Net.Http;
 using System.Threading.Tasks;
-using DotNexus.Account;
-using DotNexus.Account.Models;
+using DotNexus.Accounts;
+using DotNexus.Accounts.Models;
 using DotNexus.Assets;
 using DotNexus.Assets.Models;
 using DotNexus.Core;
@@ -48,13 +48,13 @@ namespace DotNexus.Tests
             TokenService = new TokenService(LogManager.GetCurrentClassLogger(), new HttpClient(), cs, serviceSettings);
         }
 
-        public static NexusUser User => new NexusUser
+        public static NexusUserCredential UserCredential => new NexusUserCredential
         {
-                Username = "danielsan",
-                Password = "password1",
-                Pin = 1234
+            Username = "danielsan",
+            Password = "password1",
+            Pin = 1234
         };
-
+        
         public static Asset Asset => new Asset
         {
             Name = "danielsan-asset",
@@ -74,9 +74,9 @@ namespace DotNexus.Tests
             Identifier = "42"
         };
 
-        public static NexusUser GetRandomUser()
+        public static NexusUserCredential GetRandomUserCredential()
         {
-            return new NexusUser
+            return new NexusUserCredential
             {
                 Username = $"{Guid.NewGuid()}",
                 Password = "password1",

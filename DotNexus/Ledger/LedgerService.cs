@@ -26,7 +26,7 @@ namespace DotNexus.Ledger
 
             var request = new NexusRequest(new Dictionary<string, string> {{"height", height.ToString()}});
 
-            var block = await GetAsync<Block>("ledger/blockhash", request, token);
+            var block = await PostAsync<Block>("ledger/blockhash", request, token);
 
             if (string.IsNullOrWhiteSpace(block?.Hash))
                 throw new InvalidOperationException($"Get block hash {height} failed");
@@ -109,7 +109,7 @@ namespace DotNexus.Ledger
                 {"verbose", ((int) txVerbosity).ToString()}
             });
 
-            var tx = await GetAsync<Tx>("ledger/transaction", request, token);
+            var tx = await PostAsync<Tx>("ledger/transaction", request, token);
 
             if (string.IsNullOrWhiteSpace(tx?.Hash))
                 throw new InvalidOperationException($"Get tx {hash} failed");
@@ -132,7 +132,7 @@ namespace DotNexus.Ledger
                 {"verbose", ((int) txVerbosity).ToString()}
             });
 
-            return await GetAsync<Block>("ledger/block", request, token);
+            return await PostAsync<Block>("ledger/block", request, token);
         }
 
         private async Task<IEnumerable<Block>> GetBlocks(object retVal, int count, TxVerbosity txVerbosity, CancellationToken token)
@@ -151,7 +151,7 @@ namespace DotNexus.Ledger
                 {"count", count.ToString()}
             });
 
-            return await GetAsync<IEnumerable<Block>>("ledger/blocks", request, token);
+            return await PostAsync<IEnumerable<Block>>("ledger/blocks", request, token);
         }
     }
 }

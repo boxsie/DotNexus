@@ -3,63 +3,66 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNexus.Account.Models;
+using DotNexus.Accounts.Models;
 using DotNexus.Core;
 using DotNexus.Core.Enums;
-using DotNexus.Ledger;
 using DotNexus.Ledger.Models;
+using Microsoft.Extensions.Options;
 using NLog;
 
-namespace DotNexus.Account
+namespace DotNexus.Accounts
 {
     public class AccountService : NexusService
     {
-        public AccountService(ILogger log, HttpClient client, string connectionString, NexusServiceSettings serviceSettings) 
+        public AccountService(ILogger log, HttpClient client, string connectionString, NexusServiceSettings serviceSettings)
             : base(log, client, connectionString, serviceSettings) { }
 
-        public async Task<NexusUser> CreateAccountAsync(NexusUser user, CancellationToken token = default)
+        public async Task<GenesisId> CreateAccountAsync(NexusUserCredential userCredential, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
 
-            user.Validate(UserValidationMode.Create);
+            userCredential.Validate();
 
             var request = new NexusRequest(new Dictionary<string, string>
             {
-                {"username", user.Username},
-                {"password", user.Password},
-                {"pin", user.Pin.ToString()}
+                {"username", userCredential.Username},
+                {"password", userCredential.Password},
+                {"pin", userCredential.Pin.ToString()}
             });
             
-            var tx = await GetAsync<Tx>("accounts/create", request, token);
+            var tx = await PostAsync<Tx>("accounts/create", request, token);
 
             if (string.IsNullOrWhiteSpace(tx?.Genesis))
-                throw new InvalidOperationException($"Create account {user.Username} failed");
+                throw new InvalidOperationException($"Create account {userCredential.Username} failed");
 
-            user.GenesisId = new GenesisId {Genesis = tx.Genesis};
-
-            return user;
+            return new GenesisId {Genesis = tx.Genesis};
         }
 
-        public async Task<NexusUser> LoginAsync(NexusUser user, CancellationToken token = default)
+        public async Task<NexusUser> LoginAsync(NexusUserCredential userCredential, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
 
-            user.Validate(UserValidationMode.Create);
+            userCredential.Validate();
 
             var param = new Dictionary<string, string>
             {
-                {"username", user.Username},
-                {"password", user.Password}
+                {"username", userCredential.Username},
+                {"password", userCredential.Password}
             };
 
-            if (user.Pin > 0)
-                param.Add("pin", user.Pin.ToString());
+            if (userCredential.Pin.HasValue)
+                param.Add("pin", userCredential.Pin.Value.ToString());
 
-            var genesisId = await GetAsync<GenesisId>("accounts/login", new NexusRequest(param), token);
+            var genesisId = await PostAsync<GenesisId>("accounts/login", new NexusRequest(param), token);
 
-            user.GenesisId = genesisId ?? throw new InvalidOperationException($"{user.Username} login failed");
-
-            return user;
+            if (string.IsNullOrWhiteSpace(genesisId?.Session))
+                throw new InvalidOperationException($"{userCredential.Username} login failed");
+            
+            return new NexusUser
+            {
+                GenesisId = genesisId,
+                Pin = userCredential.Pin
+            };
         }
 
         public async Task<GenesisId> LogoutAsync(string sessionId = null, CancellationToken token = default)
@@ -70,7 +73,7 @@ namespace DotNexus.Account
                 ? new NexusRequest(new Dictionary<string, string> {{"session", sessionId}})
                 : null;
 
-            var id = await GetAsync<GenesisId>("accounts/logout", request, token);
+            var id = await PostAsync<GenesisId>("accounts/logout", request, token);
 
             if (string.IsNullOrWhiteSpace(id?.Genesis))
                 throw new InvalidOperationException("Logout failed");
@@ -87,7 +90,7 @@ namespace DotNexus.Account
 
             var request = new NexusRequest(new Dictionary<string, string> {{"session", sessionId}} );
 
-            return await GetAsync<bool>("accounts/lock", request, token);
+            return await PostAsync<bool>("accounts/lock", request, token);
         }
 
         public async Task<bool> UnlockAsync(int pin, CancellationToken token = default)
@@ -102,25 +105,43 @@ namespace DotNexus.Account
 
             var request = new NexusRequest(new Dictionary<string, string> {{"pin", pin.ToString()}});
 
-            return await GetAsync<bool>("accounts/unlock", request, token);
+            return await PostAsync<bool>("accounts/unlock", request, token);
         }
 
-        public async Task<IEnumerable<Tx>> GetTransactionsAsync(NexusUser nexusUser, 
+        public async Task<IEnumerable<Tx>> GetTransactionsAsync(GenesisId genesis, 
             TxVerbosity txVerbosity = TxVerbosity.PubKeySign, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
 
-            nexusUser.Validate(UserValidationMode.Lookup);
-
-            var userKeyVal = nexusUser.GetLookupKeyVal();
+            if (string.IsNullOrWhiteSpace(genesis?.Genesis))
+                throw new ArgumentException("Genesis is required");
 
             var request = new NexusRequest(new Dictionary<string, string>
             {
-                {userKeyVal.Item1, userKeyVal.Item2},
+                {"genesis", genesis.Genesis},
                 {"verbose", ((int)txVerbosity).ToString()}
             });
 
-            var txs = await GetAsync<IEnumerable<Tx>>("accounts/transactions", request, token);
+            var txs = await PostAsync<IEnumerable<Tx>>("accounts/transactions", request, token);
+
+            return txs ?? new List<Tx>();
+        }
+
+        public async Task<IEnumerable<Tx>> GetTransactionsAsync(string userName,
+            TxVerbosity txVerbosity = TxVerbosity.PubKeySign, CancellationToken token = default)
+        {
+            token.ThrowIfCancellationRequested();
+
+            if (string.IsNullOrWhiteSpace(userName))
+                throw new ArgumentException("Username is required");
+
+            var request = new NexusRequest(new Dictionary<string, string>
+            {
+                {"username", userName},
+                {"verbose", ((int)txVerbosity).ToString()}
+            });
+
+            var txs = await PostAsync<IEnumerable<Tx>>("accounts/transactions", request, token);
 
             return txs ?? new List<Tx>();
         }

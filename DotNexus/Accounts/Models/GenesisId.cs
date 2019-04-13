@@ -1,4 +1,4 @@
-﻿namespace DotNexus.Account.Models
+﻿namespace DotNexus.Accounts.Models
 {
     public class GenesisId
     {

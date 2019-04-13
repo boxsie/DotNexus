@@ -38,12 +38,12 @@ namespace DotNexus.Core
             };
         }
         
-        protected async Task<T> GetAsync<T>(string path, NexusRequest request, CancellationToken token)
+        protected async Task<T> PostAsync<T>(string path, NexusRequest request, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
 
             var requestName = typeof(T).Name;
-            var logHeader = $"API GET {path}:";
+            var logHeader = $"API POST {path}:";
             
             try
             {
@@ -55,16 +55,15 @@ namespace DotNexus.Core
 
                 if (path[0] == '/')
                     path = path.Remove(0, 1);
-                
-                var getRequest = $"{path}{(request != null ? $"?{request.GetParamString()}" : "")}";
 
-                Log.Info($"{logHeader} {getRequest}");
+                var form = new FormUrlEncodedContent(request.Param);
+                Log.Info($"{logHeader} {await form.ReadAsStringAsync()}");
 
-                var httpResponseMessage = await _client.GetAsync(getRequest, token).ConfigureAwait(false);
-                var responseJson = await httpResponseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var response = await _client.PostAsync(path, form, token).ConfigureAwait(false);
+                var responseJson = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<NexusResponse<T>>(responseJson, _settings);
 
-                if (httpResponseMessage.IsSuccessStatusCode)
+                if (response.IsSuccessStatusCode)
                 {
                     Log.Info($"{logHeader} SUCCESS");
                     Log.Info($"{logHeader} {JsonConvert.SerializeObject(result.Result)}");
@@ -73,7 +72,7 @@ namespace DotNexus.Core
                 }
 
                 Log.Error($"{logHeader} FAILED");
-                Log.Error($"{logHeader} {httpResponseMessage.StatusCode} {(result.Error != null ? $"From Nexus->'{result.Error.Code} - {result.Error.Message}'" : responseJson)}");
+                Log.Error($"{logHeader} {response.StatusCode} {(result.Error != null ? $"From Nexus->'{result.Error.Code} - {result.Error.Message}'" : responseJson)}");
 
                 return default;
             }

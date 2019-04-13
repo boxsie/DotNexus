@@ -22,17 +22,17 @@ namespace DotNexus.Tests
         [Fact]
         public async Task TokenService_CreateTokenRegisterAndAccount_ReturnsTokenInfo()
         {
-            var user = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.User);
+            var user = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.UserCredential);
 
             var rtoken = NexusServiceFixture.GetRandomTokenRegister();
             var aToken = NexusServiceFixture.GetRandomTokenAccount();
             aToken.Identifier = rtoken.Identifier;
 
-            var tokenRegister = await _clientFixture.TokenService.CreateTokenAsync(NexusServiceFixture.TokenRegister, user);
+            var tokenRegister = await _clientFixture.TokenService.CreateTokenAsync(rtoken, user);
 
             await Task.Delay(TimeSpan.FromSeconds(5));
             
-            var tokenAccount = await _clientFixture.TokenService.CreateTokenAsync(NexusServiceFixture.TokenAccount, user);
+            var tokenAccount = await _clientFixture.TokenService.CreateTokenAsync(aToken, user);
 
             await Task.Delay(TimeSpan.FromSeconds(5));
 

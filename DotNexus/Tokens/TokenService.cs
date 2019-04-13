@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNexus.Account.Models;
+using DotNexus.Accounts.Models;
 using DotNexus.Assets.Models;
 using DotNexus.Core;
 using DotNexus.Core.Enums;
@@ -21,7 +21,7 @@ namespace DotNexus.Tokens
         {
             cToken.ThrowIfCancellationRequested();
 
-            user.Validate(UserValidationMode.Authenticate);
+            user.Validate();
             token.Validate();
 
             var param = new Dictionary<string, string>
@@ -36,7 +36,7 @@ namespace DotNexus.Tokens
             if (token is TokenRegister register)
                 param.Add("supply", register.Supply.ToString(CultureInfo.InvariantCulture));
 
-            var response = await GetAsync<NexusCreationResponse>("tokens/create", new NexusRequest(param), cToken);
+            var response = await PostAsync<NexusCreationResponse>("tokens/create", new NexusRequest(param), cToken);
 
             if (string.IsNullOrWhiteSpace(response?.Address))
                 throw new InvalidOperationException($"{token.Name} creation failed");
@@ -62,7 +62,7 @@ namespace DotNexus.Tokens
                 {"type", token.Type}
             });
 
-            var tokenInfo = await GetAsync<TokenInfo>("tokens/get", request, cToken);
+            var tokenInfo = await PostAsync<TokenInfo>("tokens/get", request, cToken);
 
             if (tokenInfo == null)
                 throw new InvalidOperationException($"{token.Name} get failed");

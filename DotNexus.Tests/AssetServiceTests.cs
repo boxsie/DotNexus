@@ -21,7 +21,7 @@ namespace DotNexus.Tests
         [Fact]
         public async Task AssetService_CreateAsset_ReturnsAssetId()
         {
-            var user = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.User);
+            var user = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.UserCredential);
 
             var assetId = await _clientFixture.AssetService.CreateAssetAsync(NexusServiceFixture.GetRandomAsset(), user);
 
@@ -31,7 +31,7 @@ namespace DotNexus.Tests
         [Fact]
         public async Task AssetService_CreateAssetRetrieveAsset_ReturnsAsset()
         {
-            var user = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.User);
+            var user = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.UserCredential);
             
             var assetId = await _clientFixture.AssetService.CreateAssetAsync(NexusServiceFixture.GetRandomAsset(), user);
             
@@ -45,13 +45,17 @@ namespace DotNexus.Tests
         [Fact]
         public async Task AssetService_CreateAssetCreateUserTransferAsset_AssetHistoryReflectsTransfer()
         {
-            var fromUser = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.User);
-            var toUser = await _clientFixture.AccountService.LoginAsync(await _clientFixture.AccountService.CreateAccountAsync(NexusServiceFixture.GetRandomUser()));
+            var fromUser = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.UserCredential);
+
+            var toUserCredential = NexusServiceFixture.GetRandomUserCredential();
+            await _clientFixture.AccountService.CreateAccountAsync(toUserCredential);
+            var toUser = await _clientFixture.AccountService.LoginAsync(toUserCredential);
+
             var asset = await _clientFixture.AssetService.CreateAssetAsync(NexusServiceFixture.GetRandomAsset(), fromUser);
 
             await Task.Delay(TimeSpan.FromSeconds(5));
 
-            await _clientFixture.AssetService.TransferAssetAsync(asset, fromUser, toUser);
+            await _clientFixture.AssetService.TransferAssetAsync(asset, fromUser, toUser.GenesisId);
             
             await Task.Delay(TimeSpan.FromSeconds(5));
             

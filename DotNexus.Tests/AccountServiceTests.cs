@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using DotNexus.Account.Models;
 using DotNexus.Assets.Models;
 using Xunit;
 using Xunit.Abstractions;
@@ -24,15 +23,15 @@ namespace DotNexus.Tests
         [Fact]
         public async Task AccountService_CreateAccount_ReturnsGenesisTx()
         {
-            var user = await _clientFixture.AccountService.CreateAccountAsync(NexusServiceFixture.GetRandomUser());
+            var genesisId = await _clientFixture.AccountService.CreateAccountAsync(NexusServiceFixture.GetRandomUserCredential());
 
-            Assert.True(!string.IsNullOrWhiteSpace(user?.GenesisId?.Genesis));
+            Assert.True(!string.IsNullOrWhiteSpace(genesisId?.Genesis));
         }
 
         [Fact]
         public async Task AccountService_LoginLogout_AccountLogsOut()
         {
-            var nexusUser = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.User);
+            var nexusUser = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.UserCredential);
 
             var logoutGenesis = await _clientFixture.AccountService.LogoutAsync(nexusUser.GenesisId.Session);
 
@@ -42,7 +41,7 @@ namespace DotNexus.Tests
         [Fact]
         public async Task AccountService_LoginLogout_AccountLogsInAndLogsOut()
         {
-            var nexusUser = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.User);
+            var nexusUser = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.UserCredential);
 
             if (nexusUser?.GenesisId == null || string.IsNullOrWhiteSpace(nexusUser.GenesisId.Genesis))
             {
@@ -58,7 +57,7 @@ namespace DotNexus.Tests
         [Fact]
         public async Task AccountService_GetTransactionsByUsername_ReturnsTransactions()
         {
-            var transactions = await _clientFixture.AccountService.GetTransactionsAsync(NexusServiceFixture.User);
+            var transactions = await _clientFixture.AccountService.GetTransactionsAsync(NexusServiceFixture.UserCredential.Username);
 
             Assert.True(transactions != null);
         }
@@ -66,9 +65,9 @@ namespace DotNexus.Tests
         [Fact]
         public async Task AccountService_GetTransactionsByGenesis_ReturnsTransactions()
         {
-            var user = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.User);
+            var user = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.UserCredential);
 
-            var transactions = await _clientFixture.AccountService.GetTransactionsAsync(user);
+            var transactions = await _clientFixture.AccountService.GetTransactionsAsync(user.GenesisId);
 
             Assert.True(transactions != null);
         }

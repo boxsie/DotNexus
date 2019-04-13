@@ -3,12 +3,9 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Transactions;
-using DotNexus.Account.Models;
+using DotNexus.Accounts.Models;
 using DotNexus.Assets.Models;
 using DotNexus.Core;
-using DotNexus.Core.Enums;
-using DotNexus.Ledger.Models;
 using NLog;
 
 namespace DotNexus.Assets
@@ -22,7 +19,7 @@ namespace DotNexus.Assets
         {
             token.ThrowIfCancellationRequested();
 
-            user.Validate(UserValidationMode.Authenticate);
+            user.Validate();
             asset.Validate();
 
             var request = new NexusRequest(new Dictionary<string, string>
@@ -33,7 +30,7 @@ namespace DotNexus.Assets
                 {"name", asset.Name}
             });
 
-            var response = await GetAsync<NexusCreationResponse>("assets/create", request, token);
+            var response = await PostAsync<NexusCreationResponse>("assets/create", request, token);
 
             if (string.IsNullOrWhiteSpace(response?.Address))
                 throw new InvalidOperationException($"{asset.Name} creation failed");
@@ -54,7 +51,7 @@ namespace DotNexus.Assets
 
             var request = new NexusRequest(new Dictionary<string, string> {{assetKeyVal.Item1, assetKeyVal.Item2}});
 
-            var assetInfo = await GetAsync<AssetInfo>("assets/get", request, token);
+            var assetInfo = await PostAsync<AssetInfo>("assets/get", request, token);
 
             if (assetInfo == null)
                 throw new InvalidOperationException($"{asset.Name} retrieval failed");
@@ -62,38 +59,27 @@ namespace DotNexus.Assets
             return assetInfo;
         }
 
-        public async Task<Asset> TransferAssetAsync(Asset asset, NexusUser fromUser, NexusUser toUser, CancellationToken token = default)
+        public async Task<Asset> TransferAssetAsync(Asset asset, NexusUser fromUser, GenesisId toUserGenesis, CancellationToken token = default)
         {
-            token.ThrowIfCancellationRequested();
+            if (string.IsNullOrWhiteSpace(toUserGenesis?.Genesis))
+                throw new ArgumentException("Genesis is required");
 
-            fromUser.Validate(UserValidationMode.Authenticate);
-            toUser.Validate(UserValidationMode.Lookup);
-            asset.Validate();
+            return await TransferAssetAsync(asset, fromUser, ("destination", toUserGenesis.Genesis), token);
+        }
 
-            var toUserKeyVal = toUser.GetLookupKeyVal("destination");
-            var assetKeyVal = asset.GetKeyVal();
+        public async Task<Asset> TransferAssetAsync(Asset asset, NexusUser fromUser, string toUsername, CancellationToken token = default)
+        {
+            if (string.IsNullOrWhiteSpace(toUsername))
+                throw new ArgumentException("Username is required");
 
-            var request = new NexusRequest(new Dictionary<string, string>
-            {
-                {"pin", fromUser.Pin.ToString()},
-                {"session", fromUser.GenesisId.Session},
-                {toUserKeyVal.Item1, toUserKeyVal.Item2},
-                {assetKeyVal.Item1, assetKeyVal.Item2}
-            });
-
-            var newId = await GetAsync<Asset>("assets/transfer", request, token);
-
-            if (newId == null)
-                throw new InvalidOperationException($"{asset.Name} transfer from {fromUser.Username} to {toUserKeyVal.Item2} failed");
-
-            return asset;
+            return await TransferAssetAsync(asset, fromUser, ("username", toUsername), token);
         }
 
         public async Task<object> TokeniseAsset(Asset asset, Token nexusToken, NexusUser user, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
 
-            user.Validate(UserValidationMode.Authenticate);
+            user.Validate();
             asset.Validate();
             nexusToken.Validate();
 
@@ -108,7 +94,7 @@ namespace DotNexus.Assets
                 {tokenKeyVal.Item1, tokenKeyVal.Item2}
             });
 
-            return await GetAsync<Asset>("assets/tokenize", request, token);
+            return await PostAsync<Asset>("assets/tokenize", request, token);
         }
 
         public async Task<IEnumerable<AssetInfo>> GetAssetHistoryAsync(Asset asset, CancellationToken token = default)
@@ -119,12 +105,36 @@ namespace DotNexus.Assets
             
             var request = new NexusRequest(new Dictionary<string, string> { { assetKeyVal.Item1, assetKeyVal.Item2 } });
 
-            var assetHistory = await GetAsync<IEnumerable<AssetInfo>>("assets/history", request, token);
+            var assetHistory = await PostAsync<IEnumerable<AssetInfo>>("assets/history", request, token);
 
             if (assetHistory == null)
                 throw new InvalidOperationException($"Get asset {assetKeyVal.Item2} history failed");
 
             return assetHistory;
+        }
+
+        private async Task<Asset> TransferAssetAsync(Asset asset, NexusUser fromUser, (string, string) toUserKeyVal,
+            CancellationToken token = default)
+        {
+            fromUser.Validate();
+            asset.Validate();
+
+            var assetKeyVal = asset.GetKeyVal();
+
+            var request = new NexusRequest(new Dictionary<string, string>
+            {
+                {"pin", fromUser.Pin.ToString()},
+                {"session", fromUser.GenesisId.Session},
+                {toUserKeyVal.Item1, toUserKeyVal.Item2},
+                {assetKeyVal.Item1, assetKeyVal.Item2}
+            });
+
+            var newId = await PostAsync<Asset>("assets/transfer", request, token);
+
+            if (newId == null)
+                throw new InvalidOperationException($"{asset.Name} transfer from {fromUser.GenesisId.Genesis} to {toUserKeyVal.Item2} failed");
+
+            return asset;
         }
     }
 }
