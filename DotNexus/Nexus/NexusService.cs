@@ -5,17 +5,13 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using DotNexus.Core;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using NLog;
+using HttpMethod = DotNexus.Core.Enums.HttpMethod;
 
-namespace DotNexus.Core
+namespace DotNexus.Nexus
 {
-    public class NexusServiceSettings
-    {
-        public bool ApiSessions { get; set; }
-        public bool IndexHeight { get; set; }
-    }
-
     public abstract class NexusService
     {
         protected readonly ILogger Log;
@@ -37,53 +33,87 @@ namespace DotNexus.Core
                 ContractResolver = new LowercaseContractResolver()
             };
         }
-        
-        protected async Task<T> PostAsync<T>(string path, NexusRequest request, CancellationToken token)
+
+        protected Task<T> GetAsync<T>(string path, NexusRequest request, CancellationToken token = default, bool logOutput = true)
+        {
+            return RequestAsync<T>(HttpMethod.Get, path, request, token, logOutput);
+        }
+
+        protected Task<T> PostAsync<T>(string path, NexusRequest request, CancellationToken token = default, bool logOutput = true)
+        {
+            return RequestAsync<T>(HttpMethod.Post, path, request, token, logOutput);
+        }
+
+        private async Task<T> RequestAsync<T>(HttpMethod httpMethod, string path, NexusRequest request, CancellationToken token, bool logOutput)
         {
             token.ThrowIfCancellationRequested();
 
             var requestName = typeof(T).Name;
-            var logHeader = $"API POST {path}:";
-            
+            var logHeader = $"API {(httpMethod == HttpMethod.Get ? "GET" : "POST")} {path}:";
+
             try
             {
                 if (path == null)
                 {
-                    Log.Error($"Path is missing for '{requestName}' get request");
+                    Log.LogError($"Path is missing for '{requestName}' get request");
                     return default;
                 }
 
                 if (path[0] == '/')
                     path = path.Remove(0, 1);
 
-                var form = new FormUrlEncodedContent(request.Param);
-                Log.Info($"{logHeader} {await form.ReadAsStringAsync()}");
+                var response = httpMethod == HttpMethod.Get
+                    ? await GetAsync(path, logHeader, request, token, logOutput) 
+                    : await PostAsync(path, logHeader, request, token, logOutput);
 
-                var response = await _client.PostAsync(path, form, token).ConfigureAwait(false);
                 var responseJson = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<NexusResponse<T>>(responseJson, _settings);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    Log.Info($"{logHeader} SUCCESS");
-                    Log.Info($"{logHeader} {JsonConvert.SerializeObject(result.Result)}");
+                    Log.LogInformation($"{logHeader} SUCCESS");
+
+                    if (logOutput)
+                        Log.LogInformation($"{logHeader} {JsonConvert.SerializeObject(result.Result)}");
 
                     return result.Result;
                 }
 
-                Log.Error($"{logHeader} FAILED");
-                Log.Error($"{logHeader} {response.StatusCode} {(result.Error != null ? $"From Nexus->'{result.Error.Code} - {result.Error.Message}'" : responseJson)}");
+                Log.LogError($"{logHeader} FAILED");
+                Log.LogError($"{logHeader} {response.StatusCode} {(result.Error != null ? $"From Nexus->'{result.Error.Code} - {result.Error.Message}'" : responseJson)}");
 
                 return default;
             }
             catch (Exception e)
             {
-                Log.Error($"{logHeader} FAILED");
-                Log.Error(e.Message);
-                Log.Error(e.StackTrace);
+                Log.LogError($"{logHeader} FAILED");
+                Log.LogError(e.Message);
+                Log.LogError(e.StackTrace);
 
                 return default;
             }
+        }
+
+        private async Task<HttpResponseMessage> GetAsync(string path, string logHeader, NexusRequest request, CancellationToken token, bool logOutput)
+        {
+            var getRequest = request != null 
+                ? $"{path}{request.GetParamString()}" 
+                : path;
+
+            if (logOutput)
+                Log.LogInformation($"{logHeader} {getRequest}");
+
+            return await _client.GetAsync(getRequest, token);
+        }
+
+        private async Task<HttpResponseMessage> PostAsync(string path, string logHeader, NexusRequest request, CancellationToken token, bool logOutput)
+        {
+            var form = new FormUrlEncodedContent(request?.Param ?? null);
+
+            if (logOutput)
+                Log.LogInformation($"{logHeader} {await form.ReadAsStringAsync()}");
+
+            return await _client.PostAsync(path, form, token).ConfigureAwait(false);
         }
 
         private static HttpClient ConfigureHttpClient(HttpClient client, string connectionString)

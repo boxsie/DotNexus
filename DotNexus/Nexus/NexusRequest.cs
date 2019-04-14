@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace DotNexus.Core
+namespace DotNexus.Nexus
 {
     public class NexusRequest
     {

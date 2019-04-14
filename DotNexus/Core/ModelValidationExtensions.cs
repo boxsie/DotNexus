@@ -1,7 +1,6 @@
 ﻿using System;
 using DotNexus.Accounts.Models;
 using DotNexus.Assets.Models;
-using DotNexus.Core.Enums;
 
 namespace DotNexus.Core
 {
@@ -29,9 +28,6 @@ namespace DotNexus.Core
             
             if (string.IsNullOrWhiteSpace(user.GenesisId?.Session))
                 throw new ArgumentException("A session key is required");
-            
-        //    if (string.IsNullOrWhiteSpace(user.Username) && string.IsNullOrWhiteSpace(user?.GenesisId.Genesis))
-        //        throw new ArgumentException("A valid genesis ID or username is required");
         }
         
         public static void Validate(this Asset asset)

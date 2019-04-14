@@ -8,12 +8,19 @@ using DotNexus.Assets;
 using DotNexus.Assets.Models;
 using DotNexus.Core;
 using DotNexus.Ledger;
+using DotNexus.Nexus;
 using DotNexus.Tokens;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestPlatform.TestHost;
 using Newtonsoft.Json;
 using NLog;
 using NLog.Config;
+using NLog.Extensions.Logging;
 using NLog.Targets;
 using Xunit.Abstractions;
+using ILogger = NLog.ILogger;
+using LogLevel = NLog.LogLevel;
 
 namespace DotNexus.Tests
 {
@@ -23,14 +30,14 @@ namespace DotNexus.Tests
         public AccountService AccountService { get; private set; }
         public AssetService AssetService { get; private set; }
         public TokenService TokenService { get; private set; }
+        public BlockNotifyJob BlockNotify { get; private set; }
 
         public const bool IsApiSession = true;
 
         public void Configure(ITestOutputHelper outputHelper)
         {
             var config = new LoggingConfiguration();
-            config.AddRule(LogLevel.Info, LogLevel.Fatal,
-                new MethodCallTarget("testoutput", (info, objects) => { outputHelper.WriteLine(info.Message); }));
+            config.AddRule(LogLevel.Info, LogLevel.Fatal, new MethodCallTarget("testoutput", (info, objects) => { outputHelper.WriteLine(info.Message); }));
 
             LogManager.Configuration = config;
 
@@ -42,10 +49,14 @@ namespace DotNexus.Tests
                 IndexHeight = true
             };
 
-            AccountService = new AccountService(LogManager.GetCurrentClassLogger(), new HttpClient(), cs, serviceSettings);
-            LedgerService = new LedgerService(LogManager.GetCurrentClassLogger(), new HttpClient(), cs, serviceSettings);
-            AssetService = new AssetService(LogManager.GetCurrentClassLogger(), new HttpClient(), cs, serviceSettings);
-            TokenService = new TokenService(LogManager.GetCurrentClassLogger(), new HttpClient(), cs, serviceSettings);
+            var factory = new LoggerFactory().AddNLog();
+            var logger = factory.CreateLogger<NexusServiceFixture>();
+
+            AccountService = new AccountService(logger, new HttpClient(), cs, serviceSettings);
+            LedgerService = new LedgerService(logger, new HttpClient(), cs, serviceSettings);
+            AssetService = new AssetService(logger, new HttpClient(), cs, serviceSettings);
+            TokenService = new TokenService(logger, new HttpClient(), cs, serviceSettings);
+            BlockNotify = new BlockNotifyJob(factory.CreateLogger<BlockNotifyJob>(), LedgerService);
         }
 
         public static NexusUserCredential UserCredential => new NexusUserCredential

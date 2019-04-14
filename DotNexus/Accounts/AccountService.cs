@@ -7,8 +7,9 @@ using DotNexus.Accounts.Models;
 using DotNexus.Core;
 using DotNexus.Core.Enums;
 using DotNexus.Ledger.Models;
+using DotNexus.Nexus;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NLog;
 
 namespace DotNexus.Accounts
 {

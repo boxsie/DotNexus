@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using DotNexus.Accounts;
 using DotNexus.Assets;
 using DotNexus.Core;
 using DotNexus.Identity;
 using DotNexus.Ledger;
+using DotNexus.Nexus;
 using DotNexus.Tokens;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -17,16 +19,20 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using NLog;
 
 namespace DotNexus.App
 {
     public class Startup
     {
+        private readonly ILoggerFactory _logFactory;
         private readonly IConfiguration _configuration;
 
-        public Startup(IConfiguration configuration)
+        public Startup(ILoggerFactory logFactory, IConfiguration configuration)
         {
+            _logFactory = logFactory;
+
             var configurationBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
@@ -67,15 +73,18 @@ namespace DotNexus.App
             var cs = _configuration.GetConnectionString("Node");
 
             services.AddTransient<AccountService>(x => 
-                new AccountService(LogManager.GetCurrentClassLogger(), new HttpClient(), cs, serviceSettings));
+                new AccountService(_logFactory.CreateLogger<AccountService>(), new HttpClient(), cs, serviceSettings));
             services.AddTransient<LedgerService>(x =>
-                new LedgerService(LogManager.GetCurrentClassLogger(), new HttpClient(), cs, serviceSettings));
+                new LedgerService(_logFactory.CreateLogger<LedgerService>(), new HttpClient(), cs, serviceSettings));
             services.AddTransient<TokenService>(x =>
-                new TokenService(LogManager.GetCurrentClassLogger(), new HttpClient(), cs, serviceSettings));
+                new TokenService(_logFactory.CreateLogger<TokenService>(), new HttpClient(), cs, serviceSettings));
             services.AddTransient<AssetService>(x =>
-                new AssetService(LogManager.GetCurrentClassLogger(), new HttpClient(), cs, serviceSettings));
+                new AssetService(_logFactory.CreateLogger<AssetService>(), new HttpClient(), cs, serviceSettings));
 
             services.AddTransient<IUserManager, UserManager>();
+
+            services.AddTransient<BlockNotifyJob>();
+
             services.AddDistributedMemoryCache();
         }
 
@@ -97,6 +106,12 @@ namespace DotNexus.App
                 routes.MapRoute("block", "block/{blockId}", new { controller = "blockchain", action = "block" });
                 routes.MapRoute("default", "{controller=home}/{action=index}/{id?}");
             });
+
+            var t = new CancellationTokenSource();
+            var n = app.ApplicationServices.GetService<BlockNotifyJob>();
+
+            n.OnNotify = block => Task.CompletedTask;
+            n.StartAsync(3, t.Token);
         }
     }
 }

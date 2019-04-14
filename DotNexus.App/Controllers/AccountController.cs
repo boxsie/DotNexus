@@ -1,47 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using DotNexus.Accounts.Models;
+using DotNexus.App.Models;
 using DotNexus.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DotNexus.App.Controllers
 {
-    public class LoginViewModel
-    {
-        [Required]
-        [DisplayName("Username")]
-        public string Username { get; set; }
-
-        [Required]
-        [DisplayName("Password")]
-        public string Password { get; set; }
-
-        [DisplayName("PIN")]
-        public int? Pin { get; set; }
-    }
-
-    public class CreateAccountViewModel
-    {
-        [Required]
-        [DisplayName("Username")]
-        public string Username { get; set; }
-
-        [Required]
-        [DisplayName("Password")]
-        public string Password { get; set; }
-
-        [Required]
-        [DisplayName("PIN")]
-        public int? Pin { get; set; }
-
-        [DisplayName("Login immediately")]
-        public bool AutoLogin { get; set; }
-    }
-
     public class AccountController : Controller
     {
         private readonly IUserManager _userManager;

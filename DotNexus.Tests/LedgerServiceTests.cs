@@ -1,5 +1,8 @@
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -52,6 +55,29 @@ namespace DotNexus.Tests
             var tx = await _clientFixture.LedgerService.GetTransactionAsync(block.Tx[0].Hash);
             
             Assert.True(tx != null && tx.Hash == block.Tx[0].Hash);
+        }
+
+        [Fact]
+        public async Task LedgerService_StartBlockNotifySendTransaction_NotificationOfNewBlocks()
+        {
+            var token = new CancellationTokenSource();
+
+            var notified = false;
+
+            _clientFixture.BlockNotify.OnNotify = async block =>
+            {
+                notified = true;
+                await _clientFixture.BlockNotify.StopAsync(token.Token);
+                Assert.True(true);
+            };
+
+            await _clientFixture.BlockNotify.StartAsync(token.Token);
+
+            var user = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.UserCredential, token.Token);
+            await _clientFixture.AssetService.CreateAssetAsync(NexusServiceFixture.GetRandomAsset(), user, token.Token);
+
+            while (!notified)
+                await Task.Delay(1, token.Token);
         }
     }
 }

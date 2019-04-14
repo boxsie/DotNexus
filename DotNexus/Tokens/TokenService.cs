@@ -8,7 +8,8 @@ using DotNexus.Accounts.Models;
 using DotNexus.Assets.Models;
 using DotNexus.Core;
 using DotNexus.Core.Enums;
-using NLog;
+using DotNexus.Nexus;
+using Microsoft.Extensions.Logging;
 
 namespace DotNexus.Tokens
 {

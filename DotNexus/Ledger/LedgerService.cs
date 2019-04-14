@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using DotNexus.Core;
 using DotNexus.Core.Enums;
 using DotNexus.Ledger.Models;
-using NLog;
+using DotNexus.Nexus;
+using Microsoft.Extensions.Logging;
 
 namespace DotNexus.Ledger
 {
@@ -17,7 +18,7 @@ namespace DotNexus.Ledger
         public LedgerService(ILogger log, HttpClient client, string connectionString, NexusServiceSettings serviceSettings)
             : base(log, client, connectionString, serviceSettings) { }
 
-        public async Task<string> GetBlockHashAsync(int height, CancellationToken token = default)
+        public async Task<string> GetBlockHashAsync(int height, CancellationToken token = default, bool logOutput = true)
         {
             token.ThrowIfCancellationRequested();
 
@@ -26,7 +27,7 @@ namespace DotNexus.Ledger
 
             var request = new NexusRequest(new Dictionary<string, string> {{"height", height.ToString()}});
 
-            var block = await PostAsync<Block>("ledger/blockhash", request, token);
+            var block = await PostAsync<Block>("ledger/blockhash", request, token, logOutput);
 
             if (string.IsNullOrWhiteSpace(block?.Hash))
                 throw new InvalidOperationException($"Get block hash {height} failed");
@@ -34,14 +35,14 @@ namespace DotNexus.Ledger
             return block.Hash;
         }
 
-        public async Task<Block> GetBlockAsync(string hash, TxVerbosity txVerbosity = TxVerbosity.PubKeySign, CancellationToken token = default)
+        public async Task<Block> GetBlockAsync(string hash, TxVerbosity txVerbosity = TxVerbosity.PubKeySign, CancellationToken token = default, bool logOutput = true)
         {
             token.ThrowIfCancellationRequested();
 
             if (string.IsNullOrWhiteSpace(hash))
                 throw new ArgumentException("Hash must have a value");
 
-            var block = await GetBlockAsync((object)hash, txVerbosity, token);
+            var block = await GetBlockAsync((object)hash, txVerbosity, token, logOutput);
 
             if (string.IsNullOrWhiteSpace(block?.Hash))
                 throw new InvalidOperationException($"Get block {hash} failed");
@@ -49,14 +50,14 @@ namespace DotNexus.Ledger
             return block;
         }
 
-        public async Task<Block> GetBlockAsync(int height, TxVerbosity txVerbosity = TxVerbosity.PubKeySign, CancellationToken token = default)
+        public async Task<Block> GetBlockAsync(int height, TxVerbosity txVerbosity = TxVerbosity.PubKeySign, CancellationToken token = default, bool logOutput = true)
         {
             token.ThrowIfCancellationRequested();
 
             if (height <= 0)
                 throw new ArgumentException("Height must be greater than 0");
 
-            var block = await GetBlockAsync((object)height, txVerbosity, token);
+            var block = await GetBlockAsync((object)height, txVerbosity, token, logOutput);
 
             if (string.IsNullOrWhiteSpace(block?.Hash))
                 throw new InvalidOperationException($"Get block {height} failed");
@@ -65,14 +66,14 @@ namespace DotNexus.Ledger
         }
 
         public async Task<IEnumerable<Block>> GetBlocksAsync(string hash, int count = _getBlocksDefaultCount,
-            TxVerbosity txVerbosity = TxVerbosity.PubKeySign, CancellationToken token = default)
+            TxVerbosity txVerbosity = TxVerbosity.PubKeySign, CancellationToken token = default, bool logOutput = true)
         {
             token.ThrowIfCancellationRequested();
 
             if (string.IsNullOrWhiteSpace(hash))
                 throw new ArgumentException("Hash must have a value");
 
-            var blocks = await GetBlocks(hash, count, txVerbosity, token);
+            var blocks = await GetBlocks(hash, count, txVerbosity, token, logOutput);
 
             if (blocks == null)
                 throw new InvalidOperationException($"Get {count} blocks from {hash} failed");
@@ -81,14 +82,14 @@ namespace DotNexus.Ledger
         }
 
         public async Task<IEnumerable<Block>> GetBlocksAsync(int height, int count = _getBlocksDefaultCount, 
-            TxVerbosity txVerbosity = TxVerbosity.PubKeySign, CancellationToken token = default)
+            TxVerbosity txVerbosity = TxVerbosity.PubKeySign, CancellationToken token = default, bool logOutput = true)
         {
             token.ThrowIfCancellationRequested();
 
             if (height <= 0)
                 throw new ArgumentException("Height must be greater than 0");
             
-            var blocks = await GetBlocks(height, count, txVerbosity, token);
+            var blocks = await GetBlocks(height, count, txVerbosity, token, logOutput);
 
             if (blocks == null)
                 throw new InvalidOperationException($"Get {count} blocks from {height} failed");
@@ -96,7 +97,7 @@ namespace DotNexus.Ledger
             return blocks;
         }
 
-        public async Task<Tx> GetTransactionAsync(string hash, TxVerbosity txVerbosity = TxVerbosity.PubKeySign, CancellationToken token = default(CancellationToken))
+        public async Task<Tx> GetTransactionAsync(string hash, TxVerbosity txVerbosity = TxVerbosity.PubKeySign, CancellationToken token = default, bool logOutput = true)
         {
             token.ThrowIfCancellationRequested();
 
@@ -109,7 +110,7 @@ namespace DotNexus.Ledger
                 {"verbose", ((int) txVerbosity).ToString()}
             });
 
-            var tx = await PostAsync<Tx>("ledger/transaction", request, token);
+            var tx = await PostAsync<Tx>("ledger/transaction", request, token, logOutput);
 
             if (string.IsNullOrWhiteSpace(tx?.Hash))
                 throw new InvalidOperationException($"Get tx {hash} failed");
@@ -117,7 +118,19 @@ namespace DotNexus.Ledger
             return tx;
         }
 
-        private async Task<Block> GetBlockAsync(object retVal, TxVerbosity txVerbosity, CancellationToken token)
+        public async Task<MiningInfo> GetMiningInfoAsync(CancellationToken token = default)
+        {
+            token.ThrowIfCancellationRequested();
+
+            var info = await GetAsync<MiningInfo>("ledger/mininginfo", null, token);
+
+            if (info == null)
+                throw new InvalidOperationException($"Get mining info failed");
+
+            return info;
+        }
+
+        private async Task<Block> GetBlockAsync(object retVal, TxVerbosity txVerbosity, CancellationToken token, bool logOutput)
         {
             token.ThrowIfCancellationRequested();
 
@@ -132,10 +145,10 @@ namespace DotNexus.Ledger
                 {"verbose", ((int) txVerbosity).ToString()}
             });
 
-            return await PostAsync<Block>("ledger/block", request, token);
+            return await PostAsync<Block>("ledger/block", request, token, logOutput);
         }
 
-        private async Task<IEnumerable<Block>> GetBlocks(object retVal, int count, TxVerbosity txVerbosity, CancellationToken token)
+        private async Task<IEnumerable<Block>> GetBlocks(object retVal, int count, TxVerbosity txVerbosity, CancellationToken token, bool logOutput)
         {
             token.ThrowIfCancellationRequested();
 
@@ -151,7 +164,7 @@ namespace DotNexus.Ledger
                 {"count", count.ToString()}
             });
 
-            return await PostAsync<IEnumerable<Block>>("ledger/blocks", request, token);
+            return await PostAsync<IEnumerable<Block>>("ledger/blocks", request, token, logOutput);
         }
     }
 }

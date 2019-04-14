@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using DotNexus.Accounts.Models;
 using DotNexus.Assets.Models;
 using DotNexus.Core;
-using NLog;
+using DotNexus.Nexus;
+using Microsoft.Extensions.Logging;
 
 namespace DotNexus.Assets
 {

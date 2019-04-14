@@ -1,4 +1,6 @@
-﻿namespace DotNexus.Core
+﻿using DotNexus.Core;
+
+namespace DotNexus.Nexus
 {
     public class NexusResponse<T>
     {
