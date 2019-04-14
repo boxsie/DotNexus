@@ -1,9 +1,9 @@
-﻿import $ from 'jquery';
+import $ from 'jquery';
 import Vue from 'vue';
 import 'bootstrap';
-import { ipcRenderer } from 'electron';
 
 import '../Styles/layout.scss';
+import '../Images/logo.png';
 
 export default class Layout {
     constructor() {
@@ -12,7 +12,6 @@ export default class Layout {
             data: {
             },
             mounted() {
-                ipcRenderer.send('notification', 'ping');
             }
         });
     }

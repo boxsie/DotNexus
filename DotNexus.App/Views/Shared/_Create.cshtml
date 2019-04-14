@@ -1,0 +1,27 @@
+﻿@model DotNexus.App.Controllers.CreateAccountViewModel
+
+<form asp-controller="account" asp-action="create" method="post">
+    <div class="form-group">
+        <label asp-for="Username"></label>
+        <input asp-for="Username" type="text" class="form-control"/>
+        <span asp-validation-for="Username"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Password"></label>
+        <input asp-for="Password" type="password" class="form-control"/>
+        <span asp-validation-for="Password"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Pin"></label>
+        <input asp-for="Pin" type="number" class="form-control"/>
+        <span asp-validation-for="Pin"></span>
+    </div>
+    <div class="form-group">
+        <input asp-for="AutoLogin" type="checkbox"/>
+        <label asp-for="AutoLogin"></label>
+        <span asp-validation-for="AutoLogin"></span>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Create account</button>
+    </div>
+</form>

@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DotNexus.App.Controllers
 {
-    [Authorize]
     public class HomeController : Controller
     {
         private readonly IUserManager _userManager;
@@ -22,6 +21,7 @@ namespace DotNexus.App.Controllers
             return View();
         }
 
+        [Authorize]
         public IActionResult Secure()
         {
             return View();

@@ -19,6 +19,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\Markup\" />
+    <Folder Include="Resources\Images\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 </Project>

@@ -84,6 +84,21 @@ namespace DotNexus.App.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Logout()
+        {
+            try
+            {
+                await _userManager.Logout(HttpContext);
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError("summary", e.Message);
+            }
+
+            return RedirectToAction("index", "home");
+        }
+
         public IActionResult Create()
         {
             return View();

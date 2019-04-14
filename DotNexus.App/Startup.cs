@@ -5,8 +5,11 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using DotNexus.Accounts;
+using DotNexus.Assets;
 using DotNexus.Core;
 using DotNexus.Identity;
+using DotNexus.Ledger;
+using DotNexus.Tokens;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -38,7 +41,7 @@ namespace DotNexus.App
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
-                    options.ExpireTimeSpan = TimeSpan.FromSeconds(10);
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                     options.LoginPath = "/account/login";
                     options.LogoutPath = "/account/logout";
                 });
@@ -47,7 +50,7 @@ namespace DotNexus.App
 
             services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromSeconds(10);
+                options.IdleTimeout = TimeSpan.FromMinutes(10);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
                 options.Cookie.Name = ".DotNexus.App.Session";
@@ -61,8 +64,16 @@ namespace DotNexus.App
                 IndexHeight = true
             };
 
+            var cs = _configuration.GetConnectionString("Node");
+
             services.AddTransient<AccountService>(x => 
-                new AccountService(LogManager.GetCurrentClassLogger(), new HttpClient(), _configuration.GetConnectionString("Node"), serviceSettings));
+                new AccountService(LogManager.GetCurrentClassLogger(), new HttpClient(), cs, serviceSettings));
+            services.AddTransient<LedgerService>(x =>
+                new LedgerService(LogManager.GetCurrentClassLogger(), new HttpClient(), cs, serviceSettings));
+            services.AddTransient<TokenService>(x =>
+                new TokenService(LogManager.GetCurrentClassLogger(), new HttpClient(), cs, serviceSettings));
+            services.AddTransient<AssetService>(x =>
+                new AssetService(LogManager.GetCurrentClassLogger(), new HttpClient(), cs, serviceSettings));
 
             services.AddTransient<IUserManager, UserManager>();
             services.AddDistributedMemoryCache();
@@ -83,6 +94,7 @@ namespace DotNexus.App
 
             app.UseMvc(routes =>
             {
+                routes.MapRoute("block", "block/{blockId}", new { controller = "blockchain", action = "block" });
                 routes.MapRoute("default", "{controller=home}/{action=index}/{id?}");
             });
         }
