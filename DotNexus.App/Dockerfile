@@ -3,7 +3,7 @@ WORKDIR /app
 
 COPY . ./
 WORKDIR /app/DotNexus.App
-RUN dotnet publish -o out
+RUN dotnet build -o out
 
 EXPOSE 5001
 
