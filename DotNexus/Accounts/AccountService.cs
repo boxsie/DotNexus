@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using DotNexus.Accounts.Models;
 using DotNexus.Core;
 using DotNexus.Core.Enums;
+using DotNexus.Core.Nexus;
 using DotNexus.Ledger.Models;
-using DotNexus.Nexus;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -15,8 +15,8 @@ namespace DotNexus.Accounts
 {
     public class AccountService : NexusService
     {
-        public AccountService(ILogger log, HttpClient client, string connectionString, NexusServiceSettings serviceSettings)
-            : base(log, client, connectionString, serviceSettings) { }
+        public AccountService(ILogger log, INexusClient client, NexusSettings settings)
+            : base(log, client, settings) { }
 
         public async Task<GenesisId> CreateAccountAsync(NexusUserCredential userCredential, CancellationToken token = default)
         {
@@ -86,7 +86,7 @@ namespace DotNexus.Accounts
         {
             token.ThrowIfCancellationRequested();
 
-            if (ServiceSettings.ApiSessions)
+            if (Settings.ApiSessions)
                 throw new InvalidOperationException("Cannot lock with API sessions enabled");
 
             var request = new NexusRequest(new Dictionary<string, string> {{"session", sessionId}} );
@@ -98,7 +98,7 @@ namespace DotNexus.Accounts
         {
             token.ThrowIfCancellationRequested();
 
-            if (ServiceSettings.ApiSessions)
+            if (Settings.ApiSessions)
                 throw new InvalidOperationException("Cannot unlock with API sessions enabled");
 
             if (pin.ToString().Length < 4)

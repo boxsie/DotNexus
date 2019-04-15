@@ -1,25 +1,21 @@
 using System;
 using System.Globalization;
+using System.IO;
 using System.Net.Http;
-using System.Threading.Tasks;
 using DotNexus.Accounts;
 using DotNexus.Accounts.Models;
 using DotNexus.Assets;
 using DotNexus.Assets.Models;
-using DotNexus.Core;
+using DotNexus.Core.Nexus;
 using DotNexus.Ledger;
-using DotNexus.Nexus;
 using DotNexus.Tokens;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
-using Newtonsoft.Json;
 using NLog;
 using NLog.Config;
 using NLog.Extensions.Logging;
 using NLog.Targets;
 using Xunit.Abstractions;
-using ILogger = NLog.ILogger;
 using LogLevel = NLog.LogLevel;
 
 namespace DotNexus.Tests
@@ -36,26 +32,27 @@ namespace DotNexus.Tests
 
         public void Configure(ITestOutputHelper outputHelper)
         {
-            var config = new LoggingConfiguration();
-            config.AddRule(LogLevel.Info, LogLevel.Fatal, new MethodCallTarget("testoutput", (info, objects) => { outputHelper.WriteLine(info.Message); }));
+            var logConfig = new LoggingConfiguration();
+            logConfig.AddRule(LogLevel.Info, LogLevel.Fatal, new MethodCallTarget("testoutput", (info, objects) => { outputHelper.WriteLine(info.Message); }));
+            LogManager.Configuration = logConfig;
 
-            LogManager.Configuration = config;
-
-            const string cs = "http://serves:8080/;username;password;";
-
-            var serviceSettings = new NexusServiceSettings
+            var serviceSettings = new NexusSettings
             {
                 ApiSessions = true,
                 IndexHeight = true
             };
 
             var factory = new LoggerFactory().AddNLog();
-            var logger = factory.CreateLogger<NexusServiceFixture>();
 
-            AccountService = new AccountService(logger, new HttpClient(), cs, serviceSettings);
-            LedgerService = new LedgerService(logger, new HttpClient(), cs, serviceSettings);
-            AssetService = new AssetService(logger, new HttpClient(), cs, serviceSettings);
-            TokenService = new TokenService(logger, new HttpClient(), cs, serviceSettings);
+            var config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            AccountService = new AccountService(factory.CreateLogger<AccountService>(), new NexusClient(factory.CreateLogger<NexusClient>(), new HttpClient(), config), serviceSettings);
+            LedgerService = new LedgerService(factory.CreateLogger<LedgerService>(), new NexusClient(factory.CreateLogger<NexusClient>(), new HttpClient(), config), serviceSettings);
+            AssetService = new AssetService(factory.CreateLogger<AssetService>(), new NexusClient(factory.CreateLogger<NexusClient>(), new HttpClient(), config), serviceSettings);
+            TokenService = new TokenService(factory.CreateLogger<AccountService>(), new NexusClient(factory.CreateLogger<NexusClient>(), new HttpClient(), config), serviceSettings);
             BlockNotify = new BlockNotifyJob(factory.CreateLogger<BlockNotifyJob>(), LedgerService);
         }
 

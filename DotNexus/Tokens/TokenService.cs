@@ -8,15 +8,15 @@ using DotNexus.Accounts.Models;
 using DotNexus.Assets.Models;
 using DotNexus.Core;
 using DotNexus.Core.Enums;
-using DotNexus.Nexus;
+using DotNexus.Core.Nexus;
 using Microsoft.Extensions.Logging;
 
 namespace DotNexus.Tokens
 {
     public class TokenService : NexusService
     {
-        public TokenService(ILogger log, HttpClient client, string connectionString, NexusServiceSettings serviceSettings) 
-            : base(log, client, connectionString, serviceSettings) { }
+        public TokenService(ILogger log, INexusClient client, NexusSettings settings) 
+            : base(log, client, settings) { }
 
         public async Task<T> CreateTokenAsync<T>(T token, NexusUser user, CancellationToken cToken = default) where T : Token
         {

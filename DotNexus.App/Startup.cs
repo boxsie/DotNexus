@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 using DotNexus.Accounts;
 using DotNexus.Assets;
 using DotNexus.Core;
+using DotNexus.Core.Nexus;
 using DotNexus.Identity;
 using DotNexus.Ledger;
-using DotNexus.Nexus;
 using DotNexus.Tokens;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -64,22 +64,18 @@ namespace DotNexus.App
 
             var sp = services.BuildServiceProvider();
 
-            var serviceSettings = new NexusServiceSettings
+            var serviceSettings = new NexusSettings
             {
                 ApiSessions = true,
                 IndexHeight = true
             };
 
-            var cs = _configuration.GetConnectionString("Node");
+            services.AddHttpClient<INexusClient, NexusClient>();
 
-            services.AddTransient<AccountService>(x => 
-                new AccountService(_logFactory.CreateLogger<AccountService>(), new HttpClient(), cs, serviceSettings));
-            services.AddTransient<LedgerService>(x =>
-                new LedgerService(_logFactory.CreateLogger<LedgerService>(), new HttpClient(), cs, serviceSettings));
-            services.AddTransient<TokenService>(x =>
-                new TokenService(_logFactory.CreateLogger<TokenService>(), new HttpClient(), cs, serviceSettings));
-            services.AddTransient<AssetService>(x =>
-                new AssetService(_logFactory.CreateLogger<AssetService>(), new HttpClient(), cs, serviceSettings));
+            services.AddTransient<AccountService>(x => new AccountService(_logFactory.CreateLogger<AccountService>(), x.GetService<INexusClient>(), serviceSettings));
+            services.AddTransient<LedgerService>(x => new LedgerService(_logFactory.CreateLogger<LedgerService>(), x.GetService<INexusClient>(), serviceSettings));
+            services.AddTransient<TokenService>(x => new TokenService(_logFactory.CreateLogger<TokenService>(), x.GetService<INexusClient>(), serviceSettings));
+            services.AddTransient<AssetService>(x => new AssetService(_logFactory.CreateLogger<AssetService>(), x.GetService<INexusClient>(), serviceSettings));
 
             services.AddTransient<IUserManager, UserManager>();
 

@@ -5,8 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using DotNexus.Core;
 using DotNexus.Core.Enums;
+using DotNexus.Core.Nexus;
 using DotNexus.Ledger.Models;
-using DotNexus.Nexus;
 using Microsoft.Extensions.Logging;
 
 namespace DotNexus.Ledger
@@ -15,8 +15,8 @@ namespace DotNexus.Ledger
     {
         private const int _getBlocksDefaultCount = 10;
 
-        public LedgerService(ILogger log, HttpClient client, string connectionString, NexusServiceSettings serviceSettings)
-            : base(log, client, connectionString, serviceSettings) { }
+        public LedgerService(ILogger log, INexusClient client, NexusSettings settings)
+            : base(log, client, settings) { }
 
         public async Task<string> GetBlockHashAsync(int height, CancellationToken token = default, bool logOutput = true)
         {

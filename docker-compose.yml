@@ -1,0 +1,12 @@
+version: '3'
+services:
+  dotnexus:
+    build: DotNexus.App/Dockerfile
+    ports:
+     - "5001:5001"
+  tritium:
+    image: "tritium"
+    ports:
+     - "8080:8080"
+     - "9090"
+    privileged: true

@@ -36,7 +36,7 @@ namespace DotNexus.Ledger
                 if (info == null)
                     return;
 
-                var lastBlock = await _ledgerService.GetBlockAsync(info.Blocks, TxVerbosity.GenNextPrev);
+                var lastBlock = await _ledgerService.GetBlockAsync(info.Blocks, TxVerbosity.Hash);
                 
                 if (lastBlock == null)
                     return;
@@ -44,15 +44,35 @@ namespace DotNexus.Ledger
                 _lastBlock = lastBlock;
             }
 
-            _lastBlock = await _ledgerService.GetBlockAsync(_lastBlock.Hash, TxVerbosity.GenNextPrev, CancellationToken.None, false);
+            //_lastBlock = await _ledgerService.GetBlockAsync(_lastBlock.Hash, TxVerbosity.GenNextPrev, CancellationToken.None, false);
 
-            while (!string.IsNullOrWhiteSpace(_lastBlock.NextBlockHash))
+            //while (!string.IsNullOrWhiteSpace(_lastBlock.NextBlockHash))
+            //{
+            //    _lastBlock = await _ledgerService.GetBlockAsync(_lastBlock.NextBlockHash, TxVerbosity.GenNextPrev);
+
+            //    await OnNotify.Invoke(_lastBlock);
+
+            //    Logger.LogInformation($"Block {_lastBlock.Height} has arrived");
+            //}
+
+            try
             {
-                _lastBlock = await _ledgerService.GetBlockAsync(_lastBlock.NextBlockHash, TxVerbosity.GenNextPrev);
+                var newBlock = await _ledgerService.GetBlockAsync(_lastBlock.Height + 1, TxVerbosity.Hash, CancellationToken.None, false);
 
-                await OnNotify.Invoke(_lastBlock);
+                while (newBlock != null)
+                {
+                    await OnNotify.Invoke(_lastBlock);
 
-                Logger.LogInformation($"Block {_lastBlock.Height} has arrived");
+                    Logger.LogInformation($"Block {_lastBlock.Height} has arrived");
+
+                    _lastBlock = newBlock;
+
+                    newBlock = await _ledgerService.GetBlockAsync(_lastBlock.Height + 1, TxVerbosity.GenNextPrev);
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                Logger.LogWarning("No new blocks found");
             }
         }
     }

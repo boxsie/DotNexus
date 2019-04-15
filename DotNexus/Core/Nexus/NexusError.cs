@@ -1,4 +1,4 @@
-﻿namespace DotNexus.Nexus
+﻿namespace DotNexus.Core.Nexus
 {
     public class NexusError
     {

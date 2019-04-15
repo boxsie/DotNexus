@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 using DotNexus.Accounts.Models;
 using DotNexus.Assets.Models;
 using DotNexus.Core;
-using DotNexus.Nexus;
+using DotNexus.Core.Nexus;
 using Microsoft.Extensions.Logging;
 
 namespace DotNexus.Assets
 {
     public class AssetService : NexusService
     {
-        public AssetService(ILogger log, HttpClient client, string connectionString, NexusServiceSettings serviceSettings) 
-            : base(log, client, connectionString, serviceSettings) { }
+        public AssetService(ILogger log, INexusClient client, NexusSettings settings) 
+            : base(log, client, settings) { }
 
         public async Task<Asset> CreateAssetAsync(Asset asset, NexusUser user, CancellationToken token = default)
         {
