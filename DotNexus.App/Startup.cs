@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNexus.Accounts;
+using DotNexus.App.Hubs;
 using DotNexus.Assets;
 using DotNexus.Core;
 using DotNexus.Core.Nexus;
@@ -63,28 +64,29 @@ namespace DotNexus.App
             });
 
             var sp = services.BuildServiceProvider();
-
-            var serviceSettings = new NexusSettings
-            {
-                ApiSessions = true,
-                IndexHeight = true
-            };
-
+            
             services.AddHttpClient<INexusClient, NexusClient>();
 
-            services.AddTransient<AccountService>(x => new AccountService(_logFactory.CreateLogger<AccountService>(), x.GetService<INexusClient>(), serviceSettings));
-            services.AddTransient<LedgerService>(x => new LedgerService(_logFactory.CreateLogger<LedgerService>(), x.GetService<INexusClient>(), serviceSettings));
-            services.AddTransient<TokenService>(x => new TokenService(_logFactory.CreateLogger<TokenService>(), x.GetService<INexusClient>(), serviceSettings));
-            services.AddTransient<AssetService>(x => new AssetService(_logFactory.CreateLogger<AssetService>(), x.GetService<INexusClient>(), serviceSettings));
+            services.AddTransient<AccountService>();
+            services.AddTransient<LedgerService>();
+            services.AddTransient<TokenService>();
+            services.AddTransient<AssetService>();
 
             services.AddTransient<IUserManager, UserManager>();
 
-            services.AddTransient<BlockNotifyJob>();
+            services.AddSingleton<BlockNotifyJob>();
+
+            services.AddSingleton<BlockhainHubContext>();
 
             services.AddDistributedMemoryCache();
+#if DEBUG
+            services.AddSignalR(o => { o.EnableDetailedErrors = true; });
+#else
+            services.AddSignalR();
+#endif
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
         {
             if (env.IsDevelopment())
             {
@@ -97,17 +99,30 @@ namespace DotNexus.App
             app.UseSession();
             app.UseAuthentication();
 
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<BlockchainHub>("/blockchainhub");
+            });
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute("block", "block/{blockId}", new { controller = "blockchain", action = "block" });
                 routes.MapRoute("default", "{controller=home}/{action=index}/{id?}");
             });
+            
+            serviceProvider.GetService<BlockhainHubContext>();
 
-            var t = new CancellationTokenSource();
-            var n = app.ApplicationServices.GetService<BlockNotifyJob>();
+            Task.Run(() => Start(app));
+            
+        }
 
-            n.OnNotify = block => Task.CompletedTask;
-            n.StartAsync(3, t.Token);
+        private static async Task Start(IApplicationBuilder app)
+        {
+            var cancel = new CancellationTokenSource();
+
+            await app.ApplicationServices.GetService<BlockNotifyJob>()
+                .StartAsync(3, cancel.Token)
+                .ConfigureAwait(false);
         }
     }
 }

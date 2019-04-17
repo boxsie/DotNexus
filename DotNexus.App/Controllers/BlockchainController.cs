@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DotNexus.App.Models;
 using DotNexus.Ledger;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -17,9 +18,16 @@ namespace DotNexus.App.Controllers
             _ledgerService = ledgerService;
         }
 
-        public IActionResult Blocks()
+        public async Task<IActionResult> Blocks()
         {
-            return View();
+            var lastHeight = await _ledgerService.GetHeightAsync();
+            var startBlockHash = await _ledgerService.GetBlockHashAsync(lastHeight - 10);
+            var latestBlocks = await _ledgerService.GetBlocksAsync(startBlockHash, 10);
+
+            return View(new BlockchainBlocksViewModel
+            {
+                LatestBlocks = latestBlocks.ToList()
+            });
         }
 
         public IActionResult Transactions()

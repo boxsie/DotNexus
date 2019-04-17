@@ -1,0 +1,35 @@
+﻿@model DotNexus.App.Models.CreateAssetViewModel
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="offset-sm-3 offset-lg-4 col-sm-6 col-lg-4">
+        <h1 class="mb-3">Create asset</h1>
+
+        <form asp-controller="asset" asp-action="create" method="post">
+            <div class="form-group">
+                <label asp-for="Name"></label>
+                <input asp-for="Name" type="text" class="form-control"/>
+                <span asp-validation-for="Name"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Data"></label>
+                <textarea asp-for="Data" type="password" class="form-control" style="font-family: monospace;"></textarea>
+                <span asp-validation-for="Data"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Pin"></label>
+                <input asp-for="Pin" type="number" class="form-control"/>
+                <span asp-validation-for="Pin"></span>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Create asset</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+

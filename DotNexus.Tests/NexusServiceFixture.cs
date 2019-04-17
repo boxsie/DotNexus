@@ -36,12 +36,6 @@ namespace DotNexus.Tests
             logConfig.AddRule(LogLevel.Info, LogLevel.Fatal, new MethodCallTarget("testoutput", (info, objects) => { outputHelper.WriteLine(info.Message); }));
             LogManager.Configuration = logConfig;
 
-            var serviceSettings = new NexusSettings
-            {
-                ApiSessions = true,
-                IndexHeight = true
-            };
-
             var factory = new LoggerFactory().AddNLog();
 
             var config = new ConfigurationBuilder()
@@ -49,10 +43,10 @@ namespace DotNexus.Tests
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            AccountService = new AccountService(factory.CreateLogger<AccountService>(), new NexusClient(factory.CreateLogger<NexusClient>(), new HttpClient(), config), serviceSettings);
-            LedgerService = new LedgerService(factory.CreateLogger<LedgerService>(), new NexusClient(factory.CreateLogger<NexusClient>(), new HttpClient(), config), serviceSettings);
-            AssetService = new AssetService(factory.CreateLogger<AssetService>(), new NexusClient(factory.CreateLogger<NexusClient>(), new HttpClient(), config), serviceSettings);
-            TokenService = new TokenService(factory.CreateLogger<AccountService>(), new NexusClient(factory.CreateLogger<NexusClient>(), new HttpClient(), config), serviceSettings);
+            AccountService = new AccountService(factory.CreateLogger<AccountService>(), new NexusClient(factory.CreateLogger<NexusClient>(), new HttpClient(), config), config);
+            LedgerService = new LedgerService(factory.CreateLogger<LedgerService>(), new NexusClient(factory.CreateLogger<NexusClient>(), new HttpClient(), config), config);
+            AssetService = new AssetService(factory.CreateLogger<AssetService>(), new NexusClient(factory.CreateLogger<NexusClient>(), new HttpClient(), config), config);
+            TokenService = new TokenService(factory.CreateLogger<TokenService>(), new NexusClient(factory.CreateLogger<NexusClient>(), new HttpClient(), config), config);
             BlockNotify = new BlockNotifyJob(factory.CreateLogger<BlockNotifyJob>(), LedgerService);
         }
 

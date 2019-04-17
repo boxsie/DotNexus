@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using HttpMethod = DotNexus.Core.Enums.HttpMethod;
@@ -15,10 +16,10 @@ namespace DotNexus.Core.Nexus
         private readonly INexusClient _client;
         private readonly JsonSerializerSettings _settings;
 
-        protected NexusService(ILogger log, INexusClient client, NexusSettings settings)
+        protected NexusService(ILogger log, INexusClient client, IConfiguration config)
         {
             _log = log;
-            Settings = settings;
+            Settings = config.Get<NexusSettings>();
 
             _client = client;
 
@@ -74,6 +75,9 @@ namespace DotNexus.Core.Nexus
                     return result.Result;
                 }
 
+                if (!logOutput)
+                    return default;
+
                 _log.LogError($"{logHeader} FAILED");
                 _log.LogError($"{logHeader} {response.StatusCode} {(result.Error != null ? $"From Nexus->'{result.Error.Code} - {result.Error.Message}'" : responseJson)}");
 
@@ -81,6 +85,9 @@ namespace DotNexus.Core.Nexus
             }
             catch (Exception e)
             {
+                if (!logOutput)
+                    return default;
+
                 _log.LogError($"{logHeader} FAILED");
                 _log.LogError(e.Message);
                 _log.LogError(e.StackTrace);

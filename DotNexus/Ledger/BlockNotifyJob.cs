@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,21 +13,43 @@ namespace DotNexus.Ledger
 {
     public class BlockNotifyJob : HostedService
     {
-        public Func<Block, Task> OnNotify { get; set; }
-
         private readonly LedgerService _ledgerService;
+        private readonly Dictionary<Guid, Func<Block, Task>> _subscriptions;
 
         private Block _lastBlock;
 
         public BlockNotifyJob(ILogger<BlockNotifyJob> logger, LedgerService ledgerService, Func<Block, Task> onNotify = null) : base(logger)
         {
             _ledgerService = ledgerService;
-            OnNotify = onNotify;
+            _subscriptions = new Dictionary<Guid, Func<Block, Task>>();
         }
-        
+
+        public Guid Subscribe(Func<Block, Task> onNotify)
+        {
+            if (onNotify == null)
+                throw new ArgumentException("On notify function is required");
+
+            var id = Guid.NewGuid();
+
+            _subscriptions.Add(id, onNotify);
+
+            return id;
+        }
+
+        public void Unsubscribe(Guid id)
+        {
+            if (id == Guid.Empty)
+                throw new ArgumentException("Subscription ID is required");
+            
+            if (!_subscriptions.ContainsKey(id))
+                throw new ArgumentException($"Subscription {id} not found");
+
+            _subscriptions.Remove(id);
+        }
+
         protected override async Task ExecuteAsync()
         {
-            if (OnNotify == null)
+            if (!_subscriptions.Any())
                 return;
 
             if (_lastBlock == null)
@@ -61,7 +84,8 @@ namespace DotNexus.Ledger
 
                 while (newBlock != null)
                 {
-                    await OnNotify.Invoke(_lastBlock);
+                    foreach (var subscription in _subscriptions.Values)
+                        await subscription.Invoke(_lastBlock);
 
                     Logger.LogInformation($"Block {_lastBlock.Height} has arrived");
 

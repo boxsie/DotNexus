@@ -7,16 +7,27 @@ using DotNexus.Core;
 using DotNexus.Core.Enums;
 using DotNexus.Core.Nexus;
 using DotNexus.Ledger.Models;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace DotNexus.Ledger
 {
     public class LedgerService : NexusService
     {
-        private const int _getBlocksDefaultCount = 10;
+        private const int GetBlocksDefaultCount = 10;
 
-        public LedgerService(ILogger log, INexusClient client, NexusSettings settings)
-            : base(log, client, settings) { }
+        public LedgerService(ILogger<LedgerService> log, INexusClient client, IConfiguration config)
+            : base(log, client, config) { }
+
+        public async Task<int> GetHeightAsync(CancellationToken token = default)
+        {
+            var info = await GetMiningInfoAsync(token);
+
+            if (info == null)
+                throw new InvalidOperationException("Get blockchain height failed");
+
+            return info.Blocks;
+        }
 
         public async Task<string> GetBlockHashAsync(int height, CancellationToken token = default, bool logOutput = true)
         {
@@ -27,7 +38,7 @@ namespace DotNexus.Ledger
 
             var request = new NexusRequest(new Dictionary<string, string> {{"height", height.ToString()}});
 
-            var block = await PostAsync<Block>("ledger/blockhash", request, token, logOutput);
+            var block = await GetAsync<Block>("ledger/blockhash", request, token, logOutput);
 
             if (string.IsNullOrWhiteSpace(block?.Hash))
                 throw new InvalidOperationException($"Get block hash {height} failed");
@@ -65,7 +76,7 @@ namespace DotNexus.Ledger
             return block;
         }
 
-        public async Task<IEnumerable<Block>> GetBlocksAsync(string hash, int count = _getBlocksDefaultCount,
+        public async Task<IEnumerable<Block>> GetBlocksAsync(string hash, int count = GetBlocksDefaultCount,
             TxVerbosity txVerbosity = TxVerbosity.PubKeySign, CancellationToken token = default, bool logOutput = true)
         {
             token.ThrowIfCancellationRequested();
@@ -81,7 +92,7 @@ namespace DotNexus.Ledger
             return blocks;
         }
 
-        public async Task<IEnumerable<Block>> GetBlocksAsync(int height, int count = _getBlocksDefaultCount, 
+        public async Task<IEnumerable<Block>> GetBlocksAsync(int height, int count = GetBlocksDefaultCount, 
             TxVerbosity txVerbosity = TxVerbosity.PubKeySign, CancellationToken token = default, bool logOutput = true)
         {
             token.ThrowIfCancellationRequested();
@@ -110,7 +121,7 @@ namespace DotNexus.Ledger
                 {"verbose", ((int) txVerbosity).ToString()}
             });
 
-            var tx = await PostAsync<Tx>("ledger/transaction", request, token, logOutput);
+            var tx = await GetAsync<Tx>("ledger/transaction", request, token, logOutput);
 
             if (string.IsNullOrWhiteSpace(tx?.Hash))
                 throw new InvalidOperationException($"Get tx {hash} failed");
@@ -145,7 +156,7 @@ namespace DotNexus.Ledger
                 {"verbose", ((int) txVerbosity).ToString()}
             });
 
-            return await PostAsync<Block>("ledger/block", request, token, logOutput);
+            return await GetAsync<Block>("ledger/block", request, token, logOutput);
         }
 
         private async Task<IEnumerable<Block>> GetBlocks(object retVal, int count, TxVerbosity txVerbosity, CancellationToken token, bool logOutput)
@@ -164,7 +175,7 @@ namespace DotNexus.Ledger
                 {"count", count.ToString()}
             });
 
-            return await PostAsync<IEnumerable<Block>>("ledger/blocks", request, token, logOutput);
+            return await GetAsync<IEnumerable<Block>>("ledger/blocks", request, token, logOutput);
         }
     }
 }

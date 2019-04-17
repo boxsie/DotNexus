@@ -24,18 +24,19 @@ namespace DotNexus.App.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel viewModel, string returnUrl = null)
         {
             if (!ModelState.IsValid)
-                return View(model);
+                return View(viewModel);
 
             try
             {
                 await _userManager.Login(HttpContext, new NexusUserCredential
                 {
-                    Username = model.Username,
-                    Password = model.Password,
-                    Pin = model.Pin
+                    Username = viewModel.Username,
+                    Password = viewModel.Password,
+                    Pin = viewModel.Pin
                 });
                 
                 if (string.IsNullOrWhiteSpace(returnUrl) || !Url.IsLocalUrl(returnUrl))
@@ -47,11 +48,12 @@ namespace DotNexus.App.Controllers
             {
                 ModelState.AddModelError("summary", e.Message);
 
-                return View(model);
+                return View(viewModel);
             }
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             try
@@ -72,6 +74,7 @@ namespace DotNexus.App.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateAccountViewModel model)
         {
             if (!ModelState.IsValid)

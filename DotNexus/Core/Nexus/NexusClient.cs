@@ -12,7 +12,7 @@ namespace DotNexus.Core.Nexus
 {
     public class NexusClient : INexusClient
     {
-        private readonly ILogger _log;
+        private readonly ILogger<NexusClient> _log;
         private readonly HttpClient _client;
 
         public NexusClient(ILogger<NexusClient> log, HttpClient client, IConfiguration config)
@@ -26,7 +26,7 @@ namespace DotNexus.Core.Nexus
         public async Task<HttpResponseMessage> GetAsync(string path, string logHeader, NexusRequest request, CancellationToken token, bool logOutput)
         {
             var getRequest = request != null
-                ? $"{path}{request.GetParamString()}"
+                ? $"{path}?{request.GetParamString()}"
                 : path;
 
             if (logOutput)

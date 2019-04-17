@@ -10,13 +10,13 @@ namespace DotNexus.Core
     {
         public bool IsRunning => _executingTask != null && _executingTask.IsCompleted;
 
-        protected readonly ILogger Logger;
+        protected readonly ILogger<HostedService> Logger;
 
         private TimeSpan _jobInterval;
         private Task _executingTask;
         private CancellationTokenSource _cts;
 
-        protected HostedService(ILogger logger)
+        protected HostedService(ILogger<HostedService> logger)
         {
             Logger = logger;
             _jobInterval = TimeSpan.FromSeconds(1);

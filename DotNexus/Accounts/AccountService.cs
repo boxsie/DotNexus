@@ -8,6 +8,7 @@ using DotNexus.Core;
 using DotNexus.Core.Enums;
 using DotNexus.Core.Nexus;
 using DotNexus.Ledger.Models;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -15,8 +16,8 @@ namespace DotNexus.Accounts
 {
     public class AccountService : NexusService
     {
-        public AccountService(ILogger log, INexusClient client, NexusSettings settings)
-            : base(log, client, settings) { }
+        public AccountService(ILogger<AccountService> log, INexusClient client, IConfiguration config)
+            : base(log, client, config) { }
 
         public async Task<GenesisId> CreateAccountAsync(NexusUserCredential userCredential, CancellationToken token = default)
         {

@@ -64,12 +64,12 @@ namespace DotNexus.Tests
 
             var notified = false;
 
-            _clientFixture.BlockNotify.OnNotify = async block =>
+            _clientFixture.BlockNotify.Subscribe(async block =>
             {
                 notified = true;
                 await _clientFixture.BlockNotify.StopAsync(token.Token);
                 Assert.True(true);
-            };
+            });
 
             await _clientFixture.BlockNotify.StartAsync(token.Token);
 

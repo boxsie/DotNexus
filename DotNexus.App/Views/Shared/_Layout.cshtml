@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -11,12 +11,11 @@
 
     <script src="~/js/runtime.js"></script>
     <script src="~/js/vendor.js"></script>
-    <script src="~/js/main.js"></script>
 
     <title>@ViewData["Title"]</title>
 </head>
 <body>
-
+<div id="header">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="@Url.Action("index", "home")">
             <img src="~/img/logo.png" width="40" height="40" class="d-inline-block align-top" alt="">
@@ -69,8 +68,35 @@
             }
         </div>
     </nav>
+</div>
 
+<div id="layout">
+    <div style="position: fixed; bottom: 30px; right: 30px; min-width: 200px;">
+        <div id="newBlockToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="mr-auto">New block</strong>
+                <small class="text-muted"></small>
+                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="toast-body">
+                Block <a :href="`block/${latestBlock.height}`">#{{latestBlock.height}}</a> has been added to the blockchain
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="body">
     @RenderBody()
+</div>
+    
+<script src="~/js/main.js"></script>
+<script type="text/javascript">
+    window.vm = new dotnexus.Main({});
+</script>
+
+@(await RenderSectionAsync("Scripts", false))
 
 </body>
 </html>

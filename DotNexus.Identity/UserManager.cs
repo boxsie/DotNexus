@@ -90,11 +90,11 @@ namespace DotNexus.Identity
                 new Claim(ClaimTypes.Name, user.Username)
             };
 
-            claims.AddRange(this.GetUserRoleClaims(user));
+            claims.AddRange(GetUserRoleClaims(user));
             return claims;
         }
 
-        private IEnumerable<Claim> GetUserRoleClaims(NexusUser user)
+        private static IEnumerable<Claim> GetUserRoleClaims(NexusUser user)
         {
             var claims = new List<Claim>
             {

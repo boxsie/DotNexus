@@ -36,13 +36,13 @@ namespace DotNexus.Tests
             var token = new CancellationTokenSource();
             var notified = false;
 
-            _clientFixture.BlockNotify.OnNotify = async block =>
+            _clientFixture.BlockNotify.Subscribe(async block =>
             {
                 var asset = await _clientFixture.AssetService.GetAssetAsync(assetId, token.Token);
                 notified = true;
                 await _clientFixture.BlockNotify.StopAsync(token.Token);
                 Assert.True(!string.IsNullOrWhiteSpace(asset.Owner));
-            };
+            });
 
             await _clientFixture.BlockNotify.StartAsync(token.Token);
 

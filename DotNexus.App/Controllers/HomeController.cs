@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DotNexus.Accounts.Models;
+using DotNexus.App.Models;
 using DotNexus.Identity;
+using DotNexus.Ledger;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,13 +19,7 @@ namespace DotNexus.App.Controllers
             _userManager = userManager;
         }
 
-        public async Task<IActionResult> Index()
-        {
-            return View();
-        }
-
-        [Authorize]
-        public IActionResult Secure()
+        public IActionResult Index()
         {
             return View();
         }
