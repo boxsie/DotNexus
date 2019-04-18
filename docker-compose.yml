@@ -12,5 +12,5 @@ services:
      - "8080:8080"
      - "9090"
     privileged: true
-    volume:
+    volumes:
       - ./tao-api:/root/.TAO
