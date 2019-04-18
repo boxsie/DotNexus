@@ -6,6 +6,9 @@ services:
       dockerfile: DotNexus.App/Dockerfile
     ports:
      - "5001:80"
+    network_mode: host
+    depends_on:
+     - tritium
   tritium:
     image: "tritium"
     hostname: "tritium"
