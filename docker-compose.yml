@@ -8,6 +8,7 @@ services:
      - "5001:80"
   tritium:
     image: "tritium"
+    hostname: "tritium"
     ports:
      - "8080"
      - "9090"
