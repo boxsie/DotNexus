@@ -13,5 +13,7 @@ services:
      - "8080"
      - "9090"
     privileged: true
+    stdin_open: true
+    tty: true
     volumes:
       - ./tao-api:/root/.TAO
