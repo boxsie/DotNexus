@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: DotNexus.App/Dockerfile
     ports:
-     - "5001:5001"
+     - "5001:80"
   tritium:
     image: "tritium"
     ports:
