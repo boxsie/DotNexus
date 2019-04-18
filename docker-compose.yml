@@ -1,4 +1,5 @@
-version: '3'
+version: '3.5'
+
 services:
   dotnexus:
     image: dotnexus
@@ -7,6 +8,8 @@ services:
       dockerfile: Dockerfile.dotnexus
     ports:
      - "5001:80"
+    networks:
+      - proxynet
   tao-api:
     image: tritium
     build:
@@ -21,3 +24,9 @@ services:
     tty: true
     volumes:
       - ./tao-api:/root/.TAO
+    networks:
+      - proxynet
+
+networks:
+  proxynet:
+    name: dotnexus_network
