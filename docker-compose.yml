@@ -6,9 +6,8 @@ services:
       dockerfile: DotNexus.App/Dockerfile
     ports:
      - "5001:80"
-    network_mode: host
-    depends_on:
-     - tritium
+    networks:
+     - webproxy
   tritium:
     image: "tritium"
     hostname: "tritium"
@@ -20,3 +19,9 @@ services:
     tty: true
     volumes:
       - ./tao-api:/root/.TAO
+    networks:
+      - webproxy
+networks:
+  default:
+    external:
+      name: webproxy
