@@ -1,14 +1,16 @@
 version: '3'
 services:
   dotnexus:
-    build: 
+    image: dotnexus
+    build:
       context: .
       dockerfile: Dockerfile.dotnexus
     ports:
      - "5001:80"
-  tritium:
-    build: 
-      context: ./Config
+  tao-api:
+    image: tritium
+    build:
+      context: .
       dockerfile: Dockerfile.tao
     hostname: "tritium"
     ports:
