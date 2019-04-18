@@ -2,6 +2,7 @@ FROM microsoft/dotnet:sdk AS build-env
 WORKDIR /app
 
 COPY . ./
+COPY Config/appsettings.json /app/DotNexus.App/appsettings.json
 WORKDIR /app/DotNexus.App
 RUN dotnet publish -c Release -o out
 
