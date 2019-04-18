@@ -3,13 +3,13 @@ services:
   dotnexus:
     build: 
       context: .
-      dockerfile: DotNexus.App/Dockerfile
+      dockerfile: Dockerfile.dotnexus
     ports:
      - "5001:80"
-    networks:
-     - webproxy
   tritium:
-    image: "tritium"
+    build: 
+      context: ./Config
+      dockerfile: Dockerfile.tao
     hostname: "tritium"
     ports:
      - "8080"
@@ -19,9 +19,3 @@ services:
     tty: true
     volumes:
       - ./tao-api:/root/.TAO
-    networks:
-      - webproxy
-networks:
-  default:
-    external:
-      name: webproxy
