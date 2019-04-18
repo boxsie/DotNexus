@@ -52,20 +52,30 @@ namespace DotNexus.Ledger
             if (!_subscriptions.Any())
                 return;
 
-            if (_lastBlock == null)
+            try
             {
-                var info = await _ledgerService.GetMiningInfoAsync();
+                if (_lastBlock == null)
+                {
+                    var info = await _ledgerService.GetMiningInfoAsync();
 
-                if (info == null)
-                    return;
+                    if (info == null)
+                        return;
 
-                var lastBlock = await _ledgerService.GetBlockAsync(info.Blocks, TxVerbosity.Hash);
-                
-                if (lastBlock == null)
-                    return;
+                    var lastBlock = await _ledgerService.GetBlockAsync(info.Blocks, TxVerbosity.Hash);
 
-                _lastBlock = lastBlock;
+                    if (lastBlock == null)
+                        return;
+
+                    _lastBlock = lastBlock;
+                }
             }
+            catch (Exception)
+            {
+                Logger.LogCritical("Unable to connect to the Nexus node at this time");
+                await Task.Delay(TimeSpan.FromSeconds(10));
+                return;
+            }
+            
 
             //_lastBlock = await _ledgerService.GetBlockAsync(_lastBlock.Hash, TxVerbosity.GenNextPrev, CancellationToken.None, false);
 
