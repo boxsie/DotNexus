@@ -9,7 +9,7 @@ services:
   tritium:
     image: "tritium"
     ports:
-     - "8080:8080"
+     - "8080"
      - "9090"
     privileged: true
     volumes:
