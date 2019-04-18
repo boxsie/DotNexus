@@ -1,5 +1,8 @@
 FROM debian:latest
 
+RUN mkdir /root/.TAO
+COPY Config/api.nexus.conf /root/.TAO/nexus.conf
+
 RUN apt-get update
 RUN apt-get -yq install \
     gcc libc-dev python python-dev libffi-dev openssl libpcap-dev \
@@ -31,9 +34,6 @@ RUN cp /nexus/config/run-nexus /nexus/run-nexus && \
 
 RUN cp /nexus/config/.aliases /root/.aliases
 RUN cp /nexus/config/.cshrc /root/.cshrc
-
-RUN mkdir /root/.TAO
-COPY Config/api.nexus.conf /root/.TAO/nexus.conf
 
 ENV RUN_LISP    /lispers.net/RL
 ENV RUN_NEXUS   /nexus/run-nexus
