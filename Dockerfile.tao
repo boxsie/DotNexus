@@ -36,7 +36,7 @@ RUN cp /nexus/config/.aliases /root/.aliases
 RUN cp /nexus/config/.cshrc /root/.cshrc
 
 ENV RUN_LISP    /lispers.net/RL
-ENV RUN_NEXUS   /nexus/run-nexus
+ENV RUN_NEXUS   /nexus/nexus -printtoconsole
 ENV RUN_GETINFO /nexus/nexus getinfo
 ENV RUN_PSLISP  /lispers.net/pslisp
 
