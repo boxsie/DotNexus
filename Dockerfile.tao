@@ -33,7 +33,7 @@ RUN cp /nexus/config/.aliases /root/.aliases
 RUN cp /nexus/config/.cshrc /root/.cshrc
 
 RUN mkdir /root/.TAO
-COPY conf/mining.nexus.conf /root/.TAO
+COPY Config/api.nexus.conf /root/.TAO/nexus.conf
 
 ENV RUN_LISP    /lispers.net/RL
 ENV RUN_NEXUS   /nexus/run-nexus
