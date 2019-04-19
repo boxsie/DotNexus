@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DotNexus.App.Models;
+using DotNexus.Core.Enums;
 using DotNexus.Ledger;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -40,10 +41,17 @@ namespace DotNexus.App.Controllers
             var isHeight = int.TryParse(blockId, out var height);
 
             var block = isHeight 
-                ? await _ledgerService.GetBlockAsync(height) 
-                : await _ledgerService.GetBlockAsync(blockId);
+                ? await _ledgerService.GetBlockAsync(height, TxVerbosity.PubKeySign) 
+                : await _ledgerService.GetBlockAsync(blockId, TxVerbosity.PubKeySign);
 
             return Content(JsonConvert.SerializeObject(block));
+        }
+
+        public async Task<IActionResult> Transaction(string hash)
+        {
+            var tx = await _ledgerService.GetTransactionAsync(hash, TxVerbosity.PubKeySign);
+
+            return Content(JsonConvert.SerializeObject(tx));
         }
     }
 }

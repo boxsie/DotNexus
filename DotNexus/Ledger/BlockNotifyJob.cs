@@ -11,6 +11,22 @@ using Microsoft.Extensions.Logging;
 
 namespace DotNexus.Ledger
 {
+    public class AccountNotifyJob : HostedService
+    {
+        private readonly LedgerService _ledgerService;
+        private readonly Dictionary<Guid, Func<Block, Task>> _subscriptions;
+
+        public AccountNotifyJob(ILogger<BlockNotifyJob> logger, LedgerService ledgerService, Func<Block, Task> onNotify = null) : base(logger)
+        {
+
+        }
+
+        protected override Task ExecuteAsync()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class BlockNotifyJob : HostedService
     {
         private readonly LedgerService _ledgerService;

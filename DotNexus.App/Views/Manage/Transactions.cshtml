@@ -1,0 +1,42 @@
+﻿@model DotNexus.App.Models.ManageTransactionsViewModel
+
+@{
+    ViewData["Title"] = "Transactions";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <h1>Transactions</h1>
+
+    <table class="table table-hover" style="border: 0;">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th style="max-width: 250px;">Hash</th>
+                <th>Type</th>
+                <th>Version</th>
+                <th>Op</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var tx in Model.Transactions)
+            {
+                <tr>
+                    <td>@tx.Timestamp</td>
+                    <td style="max-width: 250px; word-wrap: break-word;">
+                        <a href="/transaction/@tx.Hash">@tx.Hash</a>
+                    </td>
+                    <td>@tx.Type</td>
+                    <td>@tx.Version</td>
+                    <td>@tx.Operation.Op</td>
+                    <td>@tx.Operation.Amount</td>
+                </tr>
+            }
+        </tbody>
+    </table>        
+</div>
+
+
+
+

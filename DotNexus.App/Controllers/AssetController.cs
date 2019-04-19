@@ -32,14 +32,14 @@ namespace DotNexus.App.Controllers
             return View();
         }
 
-        [Authorize]
+        [NexusAuthorize]
         public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
-        [Authorize]
+        [NexusAuthorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateAssetViewModel model)
         {

@@ -51,8 +51,7 @@
                             <span class="fa fa-user-circle-o"></span>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownUserLink">
-                            <a class="dropdown-item" href="@Url.Action("blocks", "blockchain")">Blocks</a>
-                            <a class="dropdown-item" href="@Url.Action("transactions", "blockchain")">Transactions</a>
+                            <a class="dropdown-item" href="@Url.Action("transactions", "manage")">Account Transactions</a>
                             <div class="mt-3">@{ await Html.RenderPartialAsync("_Logout"); }</div>
                         </div>
                     </li>

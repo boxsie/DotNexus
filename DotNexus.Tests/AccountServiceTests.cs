@@ -71,5 +71,15 @@ namespace DotNexus.Tests
 
             Assert.True(transactions != null);
         }
+
+        [Fact]
+        public async Task AccountService_GetBotificationsByGenesis_ReturnsTransactions()
+        {
+            var user = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.UserCredential);
+
+            var transactions = await _clientFixture.AccountService.GetNotificationsAsync(user.GenesisId);
+
+            Assert.True(transactions != null);
+        }
     }
 }

@@ -26,7 +26,7 @@
             </thead>
             <tbody>
             <tr v-for="block in latestBlocks" v-on:click="selectRow('/blocks/' + block.height)" style="cursor: pointer;">
-                <td><a v-bind:href="'/blocks/' + block.height">{{ block.height.toLocaleString() }}</a></td>
+                <td><a v-bind:href="'/block/' + block.height">{{ block.height.toLocaleString() }}</a></td>
                 <td>{{ $layout.parseBlockChannel(block.channel) }}</td>
                 <td class="d-none d-sm-table-cell">{{ $layout.parseBytes(block.size) }}</td>
             </tr>

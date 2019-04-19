@@ -147,5 +147,43 @@ namespace DotNexus.Accounts
 
             return txs ?? new List<Tx>();
         }
+
+        public async Task<IEnumerable<Tx>> GetNotificationsAsync(string userName,
+            TxVerbosity txVerbosity = TxVerbosity.PubKeySign, CancellationToken token = default)
+        {
+            token.ThrowIfCancellationRequested();
+
+            if (string.IsNullOrWhiteSpace(userName))
+                throw new ArgumentException("Username is required");
+
+            var request = new NexusRequest(new Dictionary<string, string>
+            {
+                {"username", userName},
+                {"verbose", ((int)txVerbosity).ToString()}
+            });
+
+            var txs = await PostAsync<IEnumerable<Tx>>("accounts/notifications", request, token);
+
+            return txs ?? new List<Tx>();
+        }
+
+        public async Task<IEnumerable<Tx>> GetNotificationsAsync(GenesisId genesis,
+            TxVerbosity txVerbosity = TxVerbosity.PubKeySign, CancellationToken token = default)
+        {
+            token.ThrowIfCancellationRequested();
+
+            if (string.IsNullOrWhiteSpace(genesis?.Genesis))
+                throw new ArgumentException("Genesis is required");
+
+            var request = new NexusRequest(new Dictionary<string, string>
+            {
+                {"genesis", genesis.Genesis},
+                {"verbose", ((int)txVerbosity).ToString()}
+            });
+
+            var txs = await PostAsync<IEnumerable<Tx>>("accounts/notifications", request, token);
+
+            return txs ?? new List<Tx>();
+        }
     }
 }

@@ -1,8 +1,15 @@
-﻿using System.ComponentModel;
+﻿using DotNexus.Ledger.Models;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace DotNexus.App.Models
 {
+    public class ManageTransactionsViewModel
+    {
+        public List<Tx> Transactions { get; set; }
+    }
+
     public class LoginViewModel
     {
         [Required]

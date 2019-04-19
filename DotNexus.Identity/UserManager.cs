@@ -7,12 +7,16 @@ using DotNexus.Accounts;
 using DotNexus.Accounts.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 
 namespace DotNexus.Identity
 {
     public class UserManager : IUserManager
     {
+        public const string NodeAuthClaimType = "NodeAuth";
+        public const string NodeAuthClaimResult = "Autherised";
+
         private readonly AccountService _accountService;
 
         public UserManager(AccountService accountService)
@@ -53,7 +57,9 @@ namespace DotNexus.Identity
         {
             var session = httpContext.Session.GetString("SessionId");
 
-            await _accountService.LogoutAsync(session);
+            if (!string.IsNullOrEmpty(session))
+                await _accountService.LogoutAsync(session);
+
             await httpContext.SignOutAsync();
         }
 
@@ -68,8 +74,14 @@ namespace DotNexus.Identity
             var genesisId = httpContext.Session.GetString("GenesisId");
             var sessionId = httpContext.Session.GetString("SessionId");
 
-            if (genesisClaim == null || usernameClaim == null || genesisClaim.Value != genesisId)
+            if (string.IsNullOrEmpty(genesisId) ||
+                string.IsNullOrEmpty(sessionId) ||
+                genesisClaim == null ||
+                usernameClaim == null ||
+                genesisClaim.Value != genesisId)
+            {
                 return null;
+            }
 
             return new NexusUser
             {
@@ -87,7 +99,8 @@ namespace DotNexus.Identity
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.GenesisId.Genesis),
-                new Claim(ClaimTypes.Name, user.Username)
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(NodeAuthClaimType, NodeAuthClaimResult)
             };
 
             claims.AddRange(GetUserRoleClaims(user));

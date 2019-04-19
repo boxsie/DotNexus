@@ -21,6 +21,9 @@ namespace DotNexus.App.Controllers
 
         public IActionResult Index()
         {
+            if (User.Identity.IsAuthenticated)
+                return RedirectToAction("index", "manage");
+            
             return View();
         }
     }
