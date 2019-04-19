@@ -11,6 +11,7 @@ using DotNexus.Assets;
 using DotNexus.Core;
 using DotNexus.Core.Nexus;
 using DotNexus.Identity;
+using DotNexus.Jobs;
 using DotNexus.Ledger;
 using DotNexus.Tokens;
 using Microsoft.AspNetCore.Authentication.Cookies;

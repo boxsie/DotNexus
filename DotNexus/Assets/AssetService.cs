@@ -7,6 +7,7 @@ using DotNexus.Accounts.Models;
 using DotNexus.Assets.Models;
 using DotNexus.Core;
 using DotNexus.Core.Nexus;
+using DotNexus.Tokens.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace DotNexus.Core
+namespace DotNexus.Jobs
 {
     public abstract class HostedService : IHostedService
     {

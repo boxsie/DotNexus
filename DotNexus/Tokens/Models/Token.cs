@@ -1,11 +1,13 @@
-﻿namespace DotNexus.Assets.Models
+﻿namespace DotNexus.Tokens.Models
 {
-    public class Asset
+    public abstract class Token
     {
-        public string Address { get; set; }
         public string Name { get; set; }
-        public string TxId { get; set; }
-        public string Data { get; set; }
+        public string Address { get; set; }
+        public string Identifier { get; set; }
+        public string Tx { get; set; }
+
+        public abstract string Type { get; }
 
         public (string, string) GetKeyVal(string addressKey = nameof(Address), string nameKey = nameof(Name))
         {

@@ -1,6 +1,7 @@
 ﻿using System;
 using DotNexus.Accounts.Models;
 using DotNexus.Assets.Models;
+using DotNexus.Tokens.Models;
 
 namespace DotNexus.Core
 {
