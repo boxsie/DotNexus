@@ -12,7 +12,11 @@ module.exports = {
     mode: 'development',
     entry: {
         'main': baseScriptsPath + 'main.js',
-        'blockchain.blocks': baseScriptsPath + 'blockchain.blocks.js'
+        'blockchain.block': baseScriptsPath + 'blockchain.block.js',
+        'blockchain.blocks': baseScriptsPath + 'blockchain.blocks.js',
+        'blockchain.genesis': baseScriptsPath + 'blockchain.genesis.js',
+        'manage.transactions': baseScriptsPath + 'manage.transactions.js'
+
     },
     output: {
         path: webRoot,

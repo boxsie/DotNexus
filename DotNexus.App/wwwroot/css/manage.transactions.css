@@ -1,0 +1,202 @@
+.preloader-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 99999; }
+  .preloader-container .preloader-bg {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #ccc;
+    border-radius: 4px;
+    opacity: 0.4; }
+  .preloader-container .preloader-anim {
+    top: 50%;
+    position: relative;
+    transform: translateY(-50%); }
+    .preloader-container .preloader-anim .sk-folding-cube {
+      margin: 0 auto;
+      width: 40px;
+      height: 40px;
+      position: relative;
+      -webkit-transform: rotateZ(45deg);
+      transform: rotateZ(45deg); }
+      .preloader-container .preloader-anim .sk-folding-cube .sk-cube {
+        float: left;
+        width: 50%;
+        height: 50%;
+        position: relative;
+        -webkit-transform: scale(1.1);
+        -ms-transform: scale(1.1);
+        transform: scale(1.1); }
+        .preloader-container .preloader-anim .sk-folding-cube .sk-cube:before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: #6362bb;
+          -webkit-animation: sk-foldCubeAngle 2.4s infinite linear both;
+          animation: sk-foldCubeAngle 2.4s infinite linear both;
+          -webkit-transform-origin: 100% 100%;
+          -ms-transform-origin: 100% 100%;
+          transform-origin: 100% 100%; }
+      .preloader-container .preloader-anim .sk-folding-cube .sk-cube2 {
+        -webkit-transform: scale(1.1) rotateZ(90deg);
+        transform: scale(1.1) rotateZ(90deg); }
+      .preloader-container .preloader-anim .sk-folding-cube .sk-cube3 {
+        -webkit-transform: scale(1.1) rotateZ(180deg);
+        transform: scale(1.1) rotateZ(180deg); }
+      .preloader-container .preloader-anim .sk-folding-cube .sk-cube4 {
+        -webkit-transform: scale(1.1) rotateZ(270deg);
+        transform: scale(1.1) rotateZ(270deg); }
+      .preloader-container .preloader-anim .sk-folding-cube .sk-cube2:before {
+        -webkit-animation-delay: 0.3s;
+        animation-delay: 0.3s; }
+      .preloader-container .preloader-anim .sk-folding-cube .sk-cube3:before {
+        -webkit-animation-delay: 0.6s;
+        animation-delay: 0.6s; }
+      .preloader-container .preloader-anim .sk-folding-cube .sk-cube4:before {
+        -webkit-animation-delay: 0.9s;
+        animation-delay: 0.9s; }
+
+@-webkit-keyframes sk-foldCubeAngle {
+  0%, 10% {
+    -webkit-transform: perspective(140px) rotateX(-180deg);
+    transform: perspective(140px) rotateX(-180deg);
+    opacity: 0; }
+  25%, 75% {
+    -webkit-transform: perspective(140px) rotateX(0deg);
+    transform: perspective(140px) rotateX(0deg);
+    opacity: 1; }
+  90%, 100% {
+    -webkit-transform: perspective(140px) rotateY(180deg);
+    transform: perspective(140px) rotateY(180deg);
+    opacity: 0; } }
+
+@keyframes sk-foldCubeAngle {
+  0%, 10% {
+    -webkit-transform: perspective(140px) rotateX(-180deg);
+    transform: perspective(140px) rotateX(-180deg);
+    opacity: 0; }
+  25%, 75% {
+    -webkit-transform: perspective(140px) rotateX(0deg);
+    transform: perspective(140px) rotateX(0deg);
+    opacity: 1; }
+  90%, 100% {
+    -webkit-transform: perspective(140px) rotateY(180deg);
+    transform: perspective(140px) rotateY(180deg);
+    opacity: 0; } }
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s; }
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0; }
+.dt-wrapper {
+  position: relative;
+  margin-top: 20px; }
+
+.data-table {
+  position: relative;
+  padding-left: 0;
+  padding-right: 0; }
+  .data-table .dt-body {
+    min-height: 150px; }
+    .data-table .dt-body .dt-row {
+      padding-top: 8px;
+      padding-bottom: 8px;
+      cursor: pointer; }
+      .data-table .dt-body .dt-row.row-index {
+        position: relative;
+        padding-left: 30px; }
+        .data-table .dt-body .dt-row.row-index .index {
+          position: absolute;
+          left: 0;
+          text-align: center;
+          width: 30px;
+          top: 49%;
+          transform: translateY(-50%); }
+          .data-table .dt-body .dt-row.row-index .index strong {
+            font-size: 12px; }
+      .data-table .dt-body .dt-row.odd-row {
+        background-color: #f2f2f2; }
+    .data-table .dt-body .dt-col, .data-table .dt-body .dt-head {
+      padding: 5px; }
+  .data-table .dt-controls {
+    margin-top: 15px;
+    text-align: center; }
+    .data-table .dt-controls label, .data-table .dt-controls select {
+      display: inline; }
+    .data-table .dt-controls .total-results {
+      font-weight: 200;
+      font-size: 16px; }
+    .data-table .dt-controls .paging {
+      display: flex;
+      justify-content: center;
+      padding-left: 0;
+      list-style: none;
+      border-radius: 4px;
+      margin: 2px 0;
+      white-space: nowrap; }
+      .data-table .dt-controls .paging li a {
+        position: relative;
+        display: block;
+        padding: 8px 10px;
+        margin-left: -1px;
+        line-height: 1.25;
+        color: #6362bb;
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        text-decoration: none; }
+        .data-table .dt-controls .paging li a.active {
+          background-color: #6362bb;
+          color: #fff; }
+          .data-table .dt-controls .paging li a.active:hover {
+            cursor: default; }
+        .data-table .dt-controls .paging li a.enabled:hover {
+          color: #403f91;
+          background-color: #e9ecef;
+          border-color: #dee2e6; }
+        .data-table .dt-controls .paging li a.disabled:hover {
+          cursor: default; }
+
+@media (min-width: 768px) {
+  .data-table {
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-left: 0;
+    margin-right: 0; }
+    .data-table .row {
+      margin-left: -15px;
+      margin-right: -15px; }
+    .data-table .data-table-col, .data-table .data-table-head {
+      padding: 12px; }
+    .data-table .dt-controls {
+      text-align: left; }
+      .data-table .dt-controls .paging {
+        justify-content: flex-end; } }
+.genesis-title {
+  height: 50px; }
+  .genesis-title .identicon-icon {
+    background: #fff;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    display: inline-block;
+    vertical-align: middle;
+    width: 50px;
+    height: 50px;
+    padding: 4px;
+    position: relative; }
+  .genesis-title .genesis {
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 14px;
+    position: relative; }

@@ -1,0 +1,24 @@
+﻿
+
+.genesis-title {
+    height: 50px;
+
+    .identicon-icon {
+        background: #fff;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        display: inline-block;
+        vertical-align: middle;
+        width: 50px;
+        height: 50px;
+        padding: 4px;
+        position: relative;
+    }
+
+    .genesis {
+        display: inline-block;
+        vertical-align: middle;
+        font-size: 14px;
+        position: relative;
+    }
+}

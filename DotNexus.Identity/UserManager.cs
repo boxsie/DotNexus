@@ -16,6 +16,9 @@ namespace DotNexus.Identity
     {
         public const string NodeAuthClaimType = "NodeAuth";
         public const string NodeAuthClaimResult = "Autherised";
+        public const string SessionIdKey = "SessionId";
+        public const string GenesisIdKey = "GenesisId";
+        public const string UsernameKey = "Username";
 
         private readonly AccountService _accountService;
 
@@ -41,11 +44,9 @@ namespace DotNexus.Identity
 
             nexusUser.Username = user.Username;
 
-            httpContext.Session.SetString("SessionId", nexusUser.GenesisId.Session);
-            httpContext.Session.SetString("GenesisId", nexusUser.GenesisId.Genesis);
-
-            if (user.Pin.HasValue)
-                httpContext.Session.SetInt32("Pin", user.Pin.Value);
+            httpContext.Session.SetString(GenesisIdKey, nexusUser.GenesisId.Genesis);
+            httpContext.Session.SetString(SessionIdKey, nexusUser.GenesisId.Session);
+            httpContext.Session.SetString(UsernameKey, nexusUser.Username);
 
             var identity = new ClaimsIdentity(GetUserClaims(nexusUser), CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
@@ -55,7 +56,7 @@ namespace DotNexus.Identity
 
         public async Task Logout(HttpContext httpContext)
         {
-            var session = httpContext.Session.GetString("SessionId");
+            var session = httpContext.Session.GetString(SessionIdKey);
 
             if (!string.IsNullOrEmpty(session))
                 await _accountService.LogoutAsync(session);
@@ -68,24 +69,18 @@ namespace DotNexus.Identity
             if (!httpContext.User.Identity.IsAuthenticated)
                 return null;
 
-            var genesisClaim = httpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-            var usernameClaim = httpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
+            var genesisClaim = httpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
+            
+            var genesisId = httpContext.Session.GetString(GenesisIdKey);
+            var sessionId = httpContext.Session.GetString(SessionIdKey);
+            var username = httpContext.Session.GetString(UsernameKey);
 
-            var genesisId = httpContext.Session.GetString("GenesisId");
-            var sessionId = httpContext.Session.GetString("SessionId");
-
-            if (string.IsNullOrEmpty(genesisId) ||
-                string.IsNullOrEmpty(sessionId) ||
-                genesisClaim == null ||
-                usernameClaim == null ||
-                genesisClaim.Value != genesisId)
-            {
+            if (string.IsNullOrEmpty(genesisId) || string.IsNullOrEmpty(sessionId) || genesisClaim == null || genesisClaim.Value != genesisId)
                 return null;
-            }
 
             return new NexusUser
             {
-                Username = usernameClaim.Value,
+                Username = username,
                 GenesisId = new GenesisId
                 {
                     Genesis = genesisId,
@@ -94,12 +89,11 @@ namespace DotNexus.Identity
             };
         }
 
-        private IEnumerable<Claim> GetUserClaims(NexusUser user)
+        private static IEnumerable<Claim> GetUserClaims(NexusUser user)
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.GenesisId.Genesis),
-                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Name, user.GenesisId.Genesis),
                 new Claim(NodeAuthClaimType, NodeAuthClaimResult)
             };
 
@@ -111,7 +105,7 @@ namespace DotNexus.Identity
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.GenesisId.Genesis)
+                new Claim(ClaimTypes.Name, user.GenesisId.Genesis)
             };
 
             return claims;

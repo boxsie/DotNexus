@@ -11,11 +11,5 @@ import '../Images/logo.png';
 export class Main {
     constructor(options) {
         Vue.use(layout, options);
-
-        window.vm = new Vue({
-            el: '#header',
-            mounted() {
-            }
-        });
     }
 }

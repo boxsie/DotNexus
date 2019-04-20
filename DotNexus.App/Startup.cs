@@ -112,6 +112,7 @@ namespace DotNexus.App
             {
                 routes.MapRoute("block", "block/{blockId}", new { controller = "blockchain", action = "block" });
                 routes.MapRoute("transaction", "transaction/{hash}", new { controller = "blockchain", action = "transaction" });
+                routes.MapRoute("genesis", "genesis/{hash}", new { controller = "blockchain", action = "genesis" });
                 routes.MapRoute("default", "{controller=home}/{action=index}/{id?}");
             });
             

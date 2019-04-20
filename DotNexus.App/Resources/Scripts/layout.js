@@ -1,13 +1,16 @@
 import $ from 'jquery';
 import Vue from 'vue';
 import { HubConnectionBuilder, LogLevel } from '@aspnet/signalr';
+import Avatars from '@dicebear/avatars';
+import SpriteCollection from '@dicebear/avatars-identicon-sprites';
 
 export default {
     install(Vue, options) {
         Vue.prototype.$layout = new Vue({
             el: '#layout',
             data: {
-                latestBlock: {}
+                latestBlock: {},
+                identiconSvg: ''
             },
             methods: {
                 parseBlockChannel(channel) {
@@ -39,6 +42,12 @@ export default {
                             $('#newBlockToast').toast('show');
                         });
                     });
+
+                if (options.userGenesis) {
+                    const avatars = new Avatars(SpriteCollection);
+                    const svg = avatars.create(options.userGenesis);
+                    this.identiconSvg = svg;
+                }
             }
         });
     }

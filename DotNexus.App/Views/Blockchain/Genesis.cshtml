@@ -1,0 +1,33 @@
+﻿@model DotNexus.App.Models.GenesisViewModel
+
+@{
+    ViewData["Title"] = "Address";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Head {
+    <link rel="stylesheet" href="~/css/blockchain.genesis.css" />
+}
+
+<div class="container-fluid mt-4">
+    <div class="genesis-title mb-3">
+        <div class="identicon-icon" v-html="identiconSvg"></div>
+        <span class="genesis pl-4 text-break">@Model.Genesis</span>
+    </div>
+
+    @{ await Html.RenderPartialAsync("_GenesisTransactions"); }
+</div>
+
+@section Scripts {
+    <script src="~/js/blockchain.genesis.js"></script>
+    <script type="text/javascript">
+        window.vm = new dotnexus.BlockchainGenesis({
+            genesis: '@Model.Genesis',
+            txs: @Json.Serialize(Model.Transactions)
+        });
+    </script>
+}
+
+
+
+
