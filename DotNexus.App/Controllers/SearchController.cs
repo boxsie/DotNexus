@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DotNexus.Ledger;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DotNexus.App.Controllers

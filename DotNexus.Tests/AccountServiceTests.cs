@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using DotNexus.Assets.Models;
 using Xunit;
 using Xunit.Abstractions;
 

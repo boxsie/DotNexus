@@ -1,0 +1,7 @@
+﻿{
+  "AppName": "DotNexus",
+  "DbFilename": "dotnexus.db",
+  "UserDataDirName": "DotNexus",
+  "EncryptKeyBase": "U0X2SRNVKNLVXJPENHZKGIJQ5T9OTRRJXFNHXUXM",
+  "UserConfigFilename": "general.user.json"
+}

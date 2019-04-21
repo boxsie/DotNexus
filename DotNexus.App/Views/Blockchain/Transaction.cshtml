@@ -1,0 +1,74 @@
+﻿@model DotNexus.Core.Ledger.Models.Transaction
+
+@{
+    ViewData["Title"] = "Transaction";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="panel">
+                <h3>Time</h3>
+                <p>@Model.Timestamp</p>
+                <h3>Confirmations</h3>
+                <p>@Model.Confirmations</p>
+                <h3>Type</h3>
+                <p>@Model.Type</p>
+                <h3>Version</h3>
+                <p>@Model.Version</p>
+            </div>
+        </div>
+
+        <div class="col-sm-6 mt-4 mt-sm-0">
+            <div class="panel">
+                <h3>Sequence</h3>
+                <p>@Model.Sequence</p>
+                <h3>Operation</h3>
+                <p>@(Model.Operation?.Op ?? "None")</p>
+                <h3>Nonce</h3>
+                <p>@(Model.Operation?.Nonce.ToString() ?? "None")</p>
+                <h3>Amount</h3>
+                <p>@(Model.Operation?.Amount.ToString() ?? "None")</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel mt-4">
+        <h3>Genesis</h3>
+        <div class="genesis-title mb-3">
+            <div class="identicon-icon" v-html="identiconSvg"></div>
+            <a class="genesis ml-2" href="/genesis/@Model.Genesis">@Model.Genesis</a>
+        </div>
+        <h3>Hash</h3>
+        <p>@Model.Hash</p>
+        <h3>Signature</h3>
+        <p>@(Model.Signature ?? "None")</p>
+        <h3>Pub Key</h3>
+        <p>@(Model.PubKey ?? "None")</p>
+        <h3>Previous</h3>
+        <p><a href="/transaction/@Model.PrevHash">@Model.PrevHash</a></p>
+        <h3>Next</h3>
+        <p>
+            @if (string.IsNullOrWhiteSpace(Model.NextHash))
+            {
+                <span>None</span>
+            }
+            else
+            {
+                <a href="/genesis/@Model.NextHash">@Model.NextHash</a>
+            }
+        </p>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        window.vm = new dotnexus.BlockchainTransaction({
+            genesis: '@Model.Genesis'
+        });
+    </script>
+}
+
+
+

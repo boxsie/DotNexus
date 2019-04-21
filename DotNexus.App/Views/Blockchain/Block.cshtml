@@ -1,121 +1,93 @@
-﻿@model DotNexus.Ledger.Models.Block
+﻿@model DotNexus.Core.Ledger.Models.Block
 
 @{
     ViewData["Title"] = "Block";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-@section Head {
-    <link rel="stylesheet" href="~/css/blockchain.block.css" />
-}
-
 <div class="container-fluid mt-4">
     <div class="row">
-        <div class="col-6">
-            <div class="card">
-                <div class="card-body">
-                    <h3>Height</h3>
-                    <p>@Model.Height</p>
-                    <h3>Channel</h3>
-                    <p>@Model.Channel</p>
-                    <h3>Size</h3>
-                    <p>@Model.Size</p>
-                    <h3>Time</h3>
-                    <p>@Model.Time</p>
-                </div>
+        <div class="col-sm-6">
+            <div class="panel">
+                <h3>Height</h3>
+                <p>@Model.Height</p>
+                <h3>Channel</h3>
+                <p>@Model.Channel</p>
+                <h3>Size</h3>
+                <p>@Model.Size</p>
+                <h3>Time</h3>
+                <p>@Model.Time</p>
             </div>
         </div>
-        <div class="col-6">
-            <div class="card">
-                <div class="card-body">
-                    <h3>Mint</h3>
-                    <p>@Model.Mint</p>
-                    <h3>Difficulty</h3>
-                    <p>@Model.Difficulty</p>
-                    <h3>Nonce</h3>
-                    <p>@Model.Nonce</p>
-                    <h3>Bits</h3>
-                    <p>@Model.Bits</p>
-                </div>
+        <div class="col-sm-6">
+            <div class="panel">
+                <h3>Mint</h3>
+                <p>@Model.Mint</p>
+                <h3>Difficulty</h3>
+                <p>@Model.Difficulty</p>
+                <h3>Nonce</h3>
+                <p>@Model.Nonce</p>
+                <h3>Bits</h3>
+                <p>@Model.Bits</p>
             </div>
         </div>
     </div>
 
-    <div class="card mt-4">
-        <div class="card-body">
-            <h3>Hash</h3>
-            <p>@Model.Hash</p>
-            <h3>Proof Hash</h3>
-            <p>@Model.ProofHash</p>
-            <h3>Previous Block</h3>
-            <p><a href="/block/@Model.PreviousBlockHash">@Model.PreviousBlockHash</a></p>
-            <h3>Next Block</h3>
-            <p>
-                @if (string.IsNullOrWhiteSpace(Model.NextBlockHash))
-                {
-                    <span>None</span>
-                }
-                else
-                {
-                    <a href="/block/@Model.NextBlockHash">@Model.NextBlockHash</a>
-                }
-            </p>
-            <h3>Merkle Root</h3>
-            <p>@Model.MerkleRoot</p>
-        </div>
-    </div>
-
-    <div class="card mt-4">
-        <div class="card-body">
-            <div class="row">
-                <div class="col-4">
-                    <h3>Tx</h3>
-                </div>
-                <div class="col-4">
-                    <h3>Genesis</h3>
-                </div>
-                <div class="col-4">
-                    <h3>Op</h3>
-                </div>
-            </div>
-            @foreach (var tx in Model.Tx)
+    <div class="panel mt-4">
+        <h3>Hash</h3>
+        <p>@Model.Hash</p>
+        <h3>Proof Hash</h3>
+        <p>@Model.ProofHash</p>
+        <h3>Previous Block</h3>
+        <p><a href="/block/@Model.PreviousBlockHash">@Model.PreviousBlockHash</a></p>
+        <h3>Next Block</h3>
+        <p>
+            @if (string.IsNullOrWhiteSpace(Model.NextBlockHash))
             {
-                <div class="row">
-                    <div class="col-4">
-                        <p><a href="/transaction/@tx.Hash">@tx.Hash</a></p>
-                    </div>
-                    <div class="col-4">
-                        <div class="row genesis-title mb-3">
-                            <div class="col-2">
-                                <div class="identicon-icon" v-html="identiconSvg('@tx.Genesis')"></div>
-                            </div>
-                            <div class="col-10">
-                                <a class="genesis ml-2" href="/genesis/@tx.Genesis">@tx.Genesis</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-4">
-                        @if (tx.Operation == null)
-                        {
-                            <span>None</span>
-                        }
-                        else
-                        {
-                            <p>@tx.Operation.Op - @tx.Operation.Amount</p>
-                        }
+                <span>None</span>
+            }
+            else
+            {
+                <a href="/block/@Model.NextBlockHash">@Model.NextBlockHash</a>
+            }
+        </p>
+        <h3>Merkle Root</h3>
+        <p>@Model.MerkleRoot</p>
+    </div>
+
+    <div class="panel mt-4">
+        <h3>Transactions</h3>
+
+        @foreach (var tx in Model.Tx)
+        {
+            <div class="row">
+                <div class="col-sm-4">
+                    <p><a href="/transaction/@tx.Hash">@tx.Hash</a></p>
+                </div>
+                <div class="col-sm-5">
+                    <div class="genesis-title mb-3">
+                        <div class="identicon-icon" v-html="identiconSvg('@tx.Genesis')"></div>
+                        <a class="genesis ml-2" href="/genesis/@tx.Genesis">@tx.Genesis</a>
                     </div>
                 </div>
-            }
-        </div>
+                <div class="col-sm-3">
+                    @if (tx.Operation == null)
+                    {
+                        <span>None</span>
+                    }
+                    else
+                    {
+                        <p>@tx.Operation.Op - @tx.Operation.Amount</p>
+                    }
+                </div>
+            </div>
+            <hr/>
+        }
     </div>
 </div>
 
 @section Scripts {
-    <script src="~/js/blockchain.block.js"></script>
     <script type="text/javascript">
         window.vm = new dotnexus.BlockchainBlock({});
     </script>
 }
-
-
-

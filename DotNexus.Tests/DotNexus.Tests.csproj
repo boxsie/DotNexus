@@ -23,8 +23,6 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
-    <PackageReference Include="NLog" Version="4.6.2" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="1.4.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
       <PrivateAssets>all</PrivateAssets>
@@ -33,7 +31,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DotNexus\DotNexus.csproj" />
+    <ProjectReference Include="..\DotNexus.Core\DotNexus.Core.csproj" />
+    <ProjectReference Include="..\DotNexus.Jobs\DotNexus.Jobs.csproj" />
   </ItemGroup>
 
 </Project>

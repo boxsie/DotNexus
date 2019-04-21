@@ -5,6 +5,11 @@ import { HubConnectionBuilder, LogLevel } from '@aspnet/signalr';
 
 import layout from './layout';
 
+export * from './blockchain.block';
+export * from './blockchain.blocks';
+export * from './blockchain.transaction';
+export * from './blockchain.genesis';
+
 import '../Styles/layout.scss';
 import '../Images/logo.png';
 

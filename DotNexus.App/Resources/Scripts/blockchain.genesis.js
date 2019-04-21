@@ -4,8 +4,6 @@ import Avatars from '@dicebear/avatars';
 import SpriteCollection from '@dicebear/avatars-identicon-sprites';
 import dataTableVue from './Library/dataTableVue';
 
-import '../Styles/blockchain.genesis.scss';
-
 export class BlockchainGenesis {
     constructor(options) {
         window.vm = new Vue({

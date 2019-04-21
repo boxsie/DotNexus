@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using DotNexus.Ledger.Models;
+using DotNexus.Core.Ledger.Models;
 
 namespace DotNexus.App.Models
 {
     public class ManageTransactionsViewModel
     {
-        public List<Tx> Transactions { get; set; }
+        public List<Transaction> Transactions { get; set; }
     }
 }

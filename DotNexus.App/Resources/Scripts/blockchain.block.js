@@ -3,8 +3,6 @@ import Vue from 'vue';
 import Avatars from '@dicebear/avatars';
 import SpriteCollection from '@dicebear/avatars-identicon-sprites';
 
-import '../Styles/blockchain.block.scss';
-
 export class BlockchainBlock {
     constructor(options) {
         window.vm = new Vue({

@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using DotNexus.Ledger.Models;
+using DotNexus.Core.Ledger.Models;
 
 namespace DotNexus.App.Models
 {

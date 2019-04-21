@@ -14,11 +14,12 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration" Version="2.2.3" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
-    <PackageReference Include="NLog" Version="4.6.2" />
-    <PackageReference Include="NLog.Web.AspNetCore" Version="4.8.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Boxsie.Wrapplication\Boxsie.Wrapplication.csproj" />
+    <ProjectReference Include="..\DotNexus.Core\DotNexus.Core.csproj" />
     <ProjectReference Include="..\DotNexus.Identity\DotNexus.Identity.csproj" />
+    <ProjectReference Include="..\DotNexus.Jobs\DotNexus.Jobs.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\Markup\" />
@@ -26,7 +27,10 @@
     <Folder Include="wwwroot\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Update="nlog.config">
+    <Content Update="Config\Json\general.live.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Config\Json\nodes.live.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

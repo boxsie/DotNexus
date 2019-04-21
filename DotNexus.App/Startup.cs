@@ -1,50 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNexus.Accounts;
+using Boxsie.Wrapplication;
+using Boxsie.Wrapplication.Config;
+using Boxsie.Wrapplication.Logging;
 using DotNexus.App.Hubs;
-using DotNexus.Assets;
-using DotNexus.Core;
+using DotNexus.Core.Accounts;
+using DotNexus.Core.Assets;
+using DotNexus.Core.Ledger;
 using DotNexus.Core.Nexus;
+using DotNexus.Core.Tokens;
 using DotNexus.Identity;
 using DotNexus.Jobs;
-using DotNexus.Ledger;
-using DotNexus.Tokens;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NLog;
 
 namespace DotNexus.App
 {
     public class Startup
     {
-        private readonly ILoggerFactory _logFactory;
-        private readonly IConfiguration _configuration;
-
-        public Startup(ILoggerFactory logFactory, IConfiguration configuration)
-        {
-            _logFactory = logFactory;
-
-            var configurationBuilder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-
-            _configuration = configurationBuilder.Build();
-        }
-
         public void ConfigureServices(IServiceCollection services)
         {
+            Bx.ConfigureServices<DotNexusApp>(services);
+
             services.AddDistributedMemoryCache();
             
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -68,10 +50,9 @@ namespace DotNexus.App
             });
 
             services.AddMvc();
-
-            var sp = services.BuildServiceProvider();
             
-            services.AddHttpClient<INexusClient, NexusClient>();
+            services.AddHttpClient<INexusClient, NexusClient>(x => { NexusClient.ConfigureHttpClient(x, "http://serves:8080/;username;password;"); });
+            services.AddSingleton<NexusSettings>(x => new NexusSettings {ApiSessions = true, IndexHeight = true});
 
             services.AddTransient<AccountService>();
             services.AddTransient<LedgerService>();
@@ -91,6 +72,8 @@ namespace DotNexus.App
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
         {
+            Bx.Configure(serviceProvider);
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -117,18 +100,23 @@ namespace DotNexus.App
             });
             
             serviceProvider.GetService<BlockhainHubContext>();
+        }
+    }
 
-            Task.Run(() => Start(app));
-            
+    public class DotNexusApp : IBxApp
+    {
+        private readonly BlockNotifyJob _blockNotifyJob;
+        private readonly CancellationTokenSource _cancellationToken;
+
+        public DotNexusApp(BlockNotifyJob blockNotifyJob)
+        {
+            _blockNotifyJob = blockNotifyJob;
+            _cancellationToken = new CancellationTokenSource();
         }
 
-        private static async Task Start(IApplicationBuilder app)
+        public async Task StartAsync()
         {
-            var cancel = new CancellationTokenSource();
 
-            await app.ApplicationServices.GetService<BlockNotifyJob>()
-                .StartAsync(3, cancel.Token)
-                .ConfigureAwait(false);
         }
     }
 }

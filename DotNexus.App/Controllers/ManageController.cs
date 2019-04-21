@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using DotNexus.Identity;
-using DotNexus.Accounts;
 using DotNexus.Core.Enums;
 using DotNexus.App.Models;
+using DotNexus.Core.Accounts;
 
 namespace DotNexus.App.Controllers
 {

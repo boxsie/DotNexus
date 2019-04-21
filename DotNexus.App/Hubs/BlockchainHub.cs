@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DotNexus.Core.Ledger.Models;
 using DotNexus.Jobs;
-using DotNexus.Ledger;
-using DotNexus.Ledger.Models;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 

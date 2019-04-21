@@ -5,10 +5,6 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-@section Head {
-    <link rel="stylesheet" href="~/css/blockchain.genesis.css" />
-}
-
 <div class="container-fluid mt-4">
     <div class="genesis-title mb-3">
         <div class="identicon-icon" v-html="identiconSvg"></div>
@@ -19,7 +15,6 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/blockchain.genesis.js"></script>
     <script type="text/javascript">
         window.vm = new dotnexus.BlockchainGenesis({
             genesis: '@Model.Genesis',

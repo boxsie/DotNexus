@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DotNexus.Accounts.Models;
 using DotNexus.App.Models;
+using DotNexus.Core.Accounts.Models;
 using DotNexus.Identity;
 using Microsoft.AspNetCore.Mvc;
 

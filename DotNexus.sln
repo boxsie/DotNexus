@@ -1,15 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.168
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.202
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNexus", "DotNexus\DotNexus.csproj", "{D28CD780-D627-42B1-AAD0-9745CACA59A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNexus.Core", "DotNexus.Core\DotNexus.Core.csproj", "{D28CD780-D627-42B1-AAD0-9745CACA59A8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNexus.Tests", "DotNexus.Tests\DotNexus.Tests.csproj", "{AD9B5195-B59A-41D1-A50B-E7E934C679D8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNexus.Identity", "DotNexus.Identity\DotNexus.Identity.csproj", "{0EA4D774-320B-465B-8840-D9D8C882CA9B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNexus.App", "DotNexus.App\DotNexus.App.csproj", "{02952FE1-1740-4423-8AAE-AAC971CF5EA8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNexus.App", "DotNexus.App\DotNexus.App.csproj", "{02952FE1-1740-4423-8AAE-AAC971CF5EA8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Boxsie.Wrapplication", "Boxsie.Wrapplication\Boxsie.Wrapplication.csproj", "{337049A7-FCCB-433D-85C0-0B583DFBEB0D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNexus.Jobs", "DotNexus.Jobs\DotNexus.Jobs.csproj", "{6C8A9924-2806-40B9-8D3B-E474F19EC783}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,14 @@ Global
 		{02952FE1-1740-4423-8AAE-AAC971CF5EA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{02952FE1-1740-4423-8AAE-AAC971CF5EA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{02952FE1-1740-4423-8AAE-AAC971CF5EA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{337049A7-FCCB-433D-85C0-0B583DFBEB0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{337049A7-FCCB-433D-85C0-0B583DFBEB0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{337049A7-FCCB-433D-85C0-0B583DFBEB0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{337049A7-FCCB-433D-85C0-0B583DFBEB0D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C8A9924-2806-40B9-8D3B-E474F19EC783}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C8A9924-2806-40B9-8D3B-E474F19EC783}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C8A9924-2806-40B9-8D3B-E474F19EC783}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C8A9924-2806-40B9-8D3B-E474F19EC783}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

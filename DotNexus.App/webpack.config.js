@@ -11,12 +11,7 @@ const chunkFileNameCss = 'css/[name].css';
 module.exports = {
     mode: 'development',
     entry: {
-        'main': baseScriptsPath + 'main.js',
-        'blockchain.block': baseScriptsPath + 'blockchain.block.js',
-        'blockchain.blocks': baseScriptsPath + 'blockchain.blocks.js',
-        'blockchain.genesis': baseScriptsPath + 'blockchain.genesis.js',
-        'manage.transactions': baseScriptsPath + 'manage.transactions.js'
-
+        'main': baseScriptsPath + 'main.js'
     },
     output: {
         path: webRoot,
