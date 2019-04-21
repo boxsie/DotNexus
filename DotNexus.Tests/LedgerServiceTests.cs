@@ -65,27 +65,27 @@ namespace DotNexus.Tests
             Assert.True(tx != null && tx.Hash == block.Tx[0].Hash);
         }
 
-        [Fact]
-        public async Task LedgerService_StartBlockNotifySendTransaction_NotificationOfNewBlocks()
-        {
-            var token = new CancellationTokenSource();
+        //[Fact]
+        //public async Task LedgerService_StartBlockNotifySendTransaction_NotificationOfNewBlocks()
+        //{
+        //    var token = new CancellationTokenSource();
 
-            var notified = false;
+        //    var notified = false;
 
-            _clientFixture.BlockNotify.Subscribe(async block =>
-            {
-                notified = true;
-                await _clientFixture.BlockNotify.StopAsync(token.Token);
-                Assert.True(true);
-            });
+        //    _clientFixture.BlockNotify.Subscribe(async block =>
+        //    {
+        //        notified = true;
+        //        await _clientFixture.BlockNotify.StopAsync(token.Token);
+        //        Assert.True(true);
+        //    });
 
-            await _clientFixture.BlockNotify.StartAsync(token.Token);
+        //    await _clientFixture.BlockNotify.StartAsync(token.Token);
 
-            var user = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.UserCredential, token.Token);
-            await _clientFixture.AssetService.CreateAssetAsync(NexusServiceFixture.GetRandomAsset(), user, token.Token);
+        //    var user = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.UserCredential, token.Token);
+        //    await _clientFixture.AssetService.CreateAssetAsync(NexusServiceFixture.GetRandomAsset(), user, token.Token);
 
-            while (!notified)
-                await Task.Delay(1, token.Token);
-        }
+        //    while (!notified)
+        //        await Task.Delay(1, token.Token);
+        //}
     }
 }

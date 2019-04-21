@@ -24,14 +24,14 @@ namespace DotNexus.Jobs
 
         protected abstract Task ExecuteAsync();
 
-        public Task StartAsync(int intervalSeconds, CancellationToken token)
+        public virtual Task StartAsync(TimeSpan interval, CancellationToken token)
         {
-            _jobInterval = TimeSpan.FromSeconds(intervalSeconds);
+            _jobInterval = interval;
 
             return StartAsync(token);
         }
 
-        public Task StartAsync(CancellationToken token)
+        public virtual Task StartAsync(CancellationToken token)
         {
             _cts = CancellationTokenSource.CreateLinkedTokenSource(token);
 

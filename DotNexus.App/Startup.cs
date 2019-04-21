@@ -1,15 +1,7 @@
 ﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Boxsie.Wrapplication;
-using Boxsie.Wrapplication.Config;
-using Boxsie.Wrapplication.Logging;
 using DotNexus.App.Hubs;
-using DotNexus.Core.Accounts;
-using DotNexus.Core.Assets;
-using DotNexus.Core.Ledger;
 using DotNexus.Core.Nexus;
-using DotNexus.Core.Tokens;
 using DotNexus.Identity;
 using DotNexus.Jobs;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -17,7 +9,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace DotNexus.App
 {
@@ -50,16 +41,28 @@ namespace DotNexus.App
             });
 
             services.AddMvc();
-            
-            services.AddHttpClient<INexusClient, NexusClient>(x => { NexusClient.ConfigureHttpClient(x, "http://serves:8080/;username;password;"); });
-            services.AddSingleton<NexusSettings>(x => new NexusSettings {ApiSessions = true, IndexHeight = true});
 
-            services.AddTransient<AccountService>();
-            services.AddTransient<LedgerService>();
-            services.AddTransient<TokenService>();
-            services.AddTransient<AssetService>();
+
+            services.AddHttpClient<INexusClient, NexusClient>();
+            services.AddSingleton<NexusNodeParameters>(new NexusNodeParameters
+            {
+                Url = "http://serves:8080/;",
+                Username = "username",
+                Password = "password",
+                Settings = new NexusNodeSettings
+                {
+                    ApiSessions = true,
+                    IndexHeight = true
+                }
+            });
+            services.AddTransient<NexusNode>();
+
+            services.AddTransient<INodeManager, NodeManager>();
             services.AddTransient<IUserManager, UserManager>();
-            services.AddSingleton<BlockNotifyJob>();
+
+            services.AddTransient<INexusServiceFactory, NexusServiceFactory>();
+            services.AddTransient<IJobFactory, JobFactory>();
+
             services.AddSingleton<BlockhainHubContext>();
 
             services.AddDistributedMemoryCache();
@@ -100,23 +103,6 @@ namespace DotNexus.App
             });
             
             serviceProvider.GetService<BlockhainHubContext>();
-        }
-    }
-
-    public class DotNexusApp : IBxApp
-    {
-        private readonly BlockNotifyJob _blockNotifyJob;
-        private readonly CancellationTokenSource _cancellationToken;
-
-        public DotNexusApp(BlockNotifyJob blockNotifyJob)
-        {
-            _blockNotifyJob = blockNotifyJob;
-            _cancellationToken = new CancellationTokenSource();
-        }
-
-        public async Task StartAsync()
-        {
-
         }
     }
 }

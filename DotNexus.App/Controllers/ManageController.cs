@@ -17,10 +17,10 @@ namespace DotNexus.App.Controllers
         private readonly IUserManager _userManager;
         private readonly AccountService _accountService;
 
-        public ManageController(IUserManager userManager, AccountService accountService)
+        public ManageController(IUserManager userManager, INexusServiceFactory serviceFactory)
         {
             _userManager = userManager;
-            _accountService = accountService;
+            _accountService = serviceFactory.Get<AccountService>(HttpContext);
         }
 
         public IActionResult Index()

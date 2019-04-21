@@ -13,45 +13,19 @@ namespace DotNexus.Jobs
 {
     public class BlockNotifyJob : HostedService
     {
+        private readonly Func<Block, Task> _onNotify;
         private readonly LedgerService _ledgerService;
-        private readonly Dictionary<Guid, Func<Block, Task>> _subscriptions;
 
         private Block _lastBlock;
-
-        public BlockNotifyJob(ILogger<BlockNotifyJob> logger, LedgerService ledgerService, Func<Block, Task> onNotify = null) : base(logger)
+        
+        public BlockNotifyJob(ILogger<BlockNotifyJob> logger, LedgerService ledgerService, Func<Block, Task> onNotify) : base(logger)
         {
             _ledgerService = ledgerService;
-            _subscriptions = new Dictionary<Guid, Func<Block, Task>>();
+            _onNotify = onNotify;
         }
-
-        public Guid Subscribe(Func<Block, Task> onNotify)
-        {
-            if (onNotify == null)
-                throw new ArgumentException("On notify function is required");
-
-            var id = Guid.NewGuid();
-
-            _subscriptions.Add(id, onNotify);
-
-            return id;
-        }
-
-        public void Unsubscribe(Guid id)
-        {
-            if (id == Guid.Empty)
-                throw new ArgumentException("Subscription ID is required");
-            
-            if (!_subscriptions.ContainsKey(id))
-                throw new ArgumentException($"Subscription {id} not found");
-
-            _subscriptions.Remove(id);
-        }
-
+        
         protected override async Task ExecuteAsync()
         {
-            if (!_subscriptions.Any())
-                return;
-
             try
             {
                 if (_lastBlock == null)
@@ -94,8 +68,7 @@ namespace DotNexus.Jobs
 
                 while (newBlock != null)
                 {
-                    foreach (var subscription in _subscriptions.Values)
-                        await subscription.Invoke(_lastBlock);
+                    await _onNotify.Invoke(_lastBlock);
 
                     Logger.LogInformation($"Block {_lastBlock.Height} has arrived");
 

@@ -16,9 +16,9 @@ namespace DotNexus.App.Controllers
         private readonly AssetService _assetService;
         private readonly IUserManager _userManager;
 
-        public AssetController(AssetService assetService, IUserManager userManager)
+        public AssetController(INexusServiceFactory serviceFactory, IUserManager userManager)
         {
-            _assetService = assetService;
+            _assetService = serviceFactory.Get<AssetService>(HttpContext);
             _userManager = userManager;
         }
 

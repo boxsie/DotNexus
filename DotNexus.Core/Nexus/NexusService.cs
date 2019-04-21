@@ -9,21 +9,26 @@ using HttpMethod = DotNexus.Core.Enums.HttpMethod;
 
 namespace DotNexus.Core.Nexus
 {
+    public interface INexusService
+    {
+        Task<T> GetAsync<T>(string path, NexusRequest request, CancellationToken token = default, bool logOutput = true);
+    }
+
     public abstract class NexusService
     {
-        protected readonly NexusSettings Settings;
+        protected readonly NexusNodeSettings NodeSettings;
 
         private readonly ILogger _log;
         private readonly INexusClient _client;
         private readonly JsonSerializerSettings _settings;
 
-        protected NexusService(INexusClient client, NexusSettings settings, ILogger log = null)
+        protected NexusService(NexusNode node, ILogger log = null)
         {
             _log = log ?? new DebugLogger("NexusService");
 
-            Settings = settings;
+            NodeSettings = node.Parameters.Settings;
 
-            _client = client;
+            _client = node.Client;
 
             _settings = new JsonSerializerSettings
             {
@@ -97,9 +102,5 @@ namespace DotNexus.Core.Nexus
                 return default;
             }
         }
-
-        
-
-        
     }
 }

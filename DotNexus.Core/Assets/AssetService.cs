@@ -12,8 +12,7 @@ namespace DotNexus.Core.Assets
 {
     public class AssetService : NexusService
     {
-        public AssetService(INexusClient client, NexusSettings settings, ILogger log = null)
-            : base(client, settings, log) { }
+        public AssetService(NexusNode node, ILogger log = null) : base(node, log) { }
 
         public async Task<Asset> CreateAssetAsync(Asset asset, NexusUser user, CancellationToken token = default)
         {

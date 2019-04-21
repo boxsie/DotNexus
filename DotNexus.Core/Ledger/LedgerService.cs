@@ -13,8 +13,7 @@ namespace DotNexus.Core.Ledger
     {
         private const int GetBlocksDefaultCount = 10;
 
-        public LedgerService(INexusClient client, NexusSettings settings, ILogger log = null)
-            : base(client, settings, log) { }
+        public LedgerService(NexusNode node, ILogger log = null) : base(node, log) { }
 
         public async Task<int> GetHeightAsync(CancellationToken token = default)
         {

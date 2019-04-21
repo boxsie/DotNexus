@@ -20,24 +20,24 @@ namespace DotNexus.Identity
         public const string GenesisIdKey = "GenesisId";
         public const string UsernameKey = "Username";
 
-        private readonly AccountService _accountService;
+        private readonly INexusServiceFactory _serviceFactory;
 
-        public UserManager(AccountService accountService)
+        public UserManager(INexusServiceFactory serviceFactory)
         {
-            _accountService = accountService;
+            _serviceFactory = serviceFactory;
         }
 
         public async Task CreateAccount(HttpContext httpContext, NexusUserCredential user, bool login = false, CancellationToken token = default)
         {
-            var genesisId = await _accountService.CreateAccountAsync(user, token);
+            var genesisId = await _serviceFactory.Get<AccountService>(httpContext).CreateAccountAsync(user, token);
 
             if (genesisId != null && login)
-                await Login(httpContext, user, false, token);
+                await LoginUser(httpContext, user, false, token);
         }
 
-        public async Task Login(HttpContext httpContext, NexusUserCredential user, bool isPersistent = false, CancellationToken token = default)
+        public async Task LoginUser(HttpContext httpContext, NexusUserCredential user, bool isPersistent = false, CancellationToken token = default)
         {
-            var nexusUser = await _accountService.LoginAsync(user, token);
+            var nexusUser = await _serviceFactory.Get<AccountService>(httpContext).LoginAsync(user, token);
 
             if (nexusUser == null)
                 return;
@@ -54,12 +54,31 @@ namespace DotNexus.Identity
             await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
         }
 
+        public async Task UpdateLoggedInUser(HttpContext httpContext, NexusUserCredential user, bool isPersistent = false, CancellationToken token = default)
+        {
+            if (!httpContext.User.Identity.IsAuthenticated)
+                return;
+
+            var nexusUser = await _serviceFactory.Get<AccountService>(httpContext).LoginAsync(user, token);
+
+            if (nexusUser == null)
+                return;
+
+            nexusUser.Username = user.Username;
+            
+            httpContext.Session.SetString(GenesisIdKey, nexusUser.GenesisId.Genesis);
+            httpContext.Session.SetString(SessionIdKey, nexusUser.GenesisId.Session);
+            httpContext.Session.SetString(UsernameKey, nexusUser.Username);
+            
+            ((ClaimsIdentity)httpContext.User.Identity).AddClaims(GetUserClaims(nexusUser));
+        }
+
         public async Task Logout(HttpContext httpContext)
         {
             var session = httpContext.Session.GetString(SessionIdKey);
 
             if (!string.IsNullOrEmpty(session))
-                await _accountService.LogoutAsync(session);
+                await _serviceFactory.Get<AccountService>(httpContext).LogoutAsync(session);
 
             await httpContext.SignOutAsync();
         }
@@ -95,17 +114,6 @@ namespace DotNexus.Identity
             {
                 new Claim(ClaimTypes.Name, user.GenesisId.Genesis),
                 new Claim(NodeAuthClaimType, NodeAuthClaimResult)
-            };
-
-            claims.AddRange(GetUserRoleClaims(user));
-            return claims;
-        }
-
-        private static IEnumerable<Claim> GetUserRoleClaims(NexusUser user)
-        {
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, user.GenesisId.Genesis)
             };
 
             return claims;

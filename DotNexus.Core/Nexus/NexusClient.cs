@@ -12,13 +12,43 @@ namespace DotNexus.Core.Nexus
 {
     public class NexusClient : INexusClient
     {
-        private readonly ILogger _log;
         private readonly HttpClient _client;
+        private readonly ILogger _log;
 
-        public NexusClient(ILogger log, HttpClient client)
+        public NexusClient(HttpClient client, ILogger log = null)
         {
-            _log = log;
             _client = client;
+            _log = log;
+        }
+
+        public void ConfigureHttpClient(NexusNodeParameters parameters)
+        {
+            if (_client == null)
+                throw new NullReferenceException("Http client is null");
+
+            if (parameters == null)
+                throw new ArgumentException("Parameters are missing");
+
+            if (string.IsNullOrWhiteSpace(parameters.Url))
+                throw new ArgumentException("URL is missing");
+
+            if (string.IsNullOrWhiteSpace(parameters.Username))
+                throw new ArgumentException("Username is missing");
+
+            if (string.IsNullOrWhiteSpace(parameters.Password))
+                throw new ArgumentException("Password is missing");
+
+            var uriResult = Uri.TryCreate(parameters.Url, UriKind.Absolute, out var baseUri)
+                            && (baseUri.Scheme == Uri.UriSchemeHttp || baseUri.Scheme == Uri.UriSchemeHttps);
+
+            if (!uriResult)
+                throw new Exception("Url is not valid");
+
+            var auth64 = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{parameters.Username}:{parameters.Password}"));
+
+            _client.BaseAddress = baseUri;
+            _client.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Basic {auth64}");
+            _client.DefaultRequestHeaders.CacheControl = CacheControlHeaderValue.Parse("no-cache");
         }
 
         public async Task<HttpResponseMessage> GetAsync(string path, string logHeader, NexusRequest request, CancellationToken token, bool logOutput)
@@ -27,7 +57,7 @@ namespace DotNexus.Core.Nexus
                 ? $"{path}?{request.GetParamString()}"
                 : path;
 
-            if (logOutput)
+            if (_log != null && logOutput)
                 _log.LogInformation($"{logHeader} {getRequest}");
 
             return await _client.GetAsync(getRequest, token);
@@ -37,52 +67,10 @@ namespace DotNexus.Core.Nexus
         {
             var form = new FormUrlEncodedContent(request?.Param ?? null);
 
-            if (logOutput)
+            if (_log != null && logOutput)
                 _log.LogInformation($"{logHeader} {await form.ReadAsStringAsync()}");
 
             return await _client.PostAsync(path, form, token).ConfigureAwait(false);
-        }
-
-        public static HttpClient ConfigureHttpClient(HttpClient client, string connectionString)
-        {
-            if (string.IsNullOrWhiteSpace(connectionString))
-                throw new Exception("Connection string is missing");
-
-            var connSplit = connectionString.Split(';');
-
-            if (connSplit.Length < 3)
-                throw new Exception("Connection string data is missing");
-
-            var baseAddress = connSplit[0];
-
-            if (string.IsNullOrWhiteSpace(baseAddress))
-                throw new Exception("Base URL is missing");
-
-            if (baseAddress.Last() != '/')
-                baseAddress = $"{baseAddress}/";
-
-            var uriResult = Uri.TryCreate(baseAddress, UriKind.Absolute, out var baseUri)
-                            && (baseUri.Scheme == Uri.UriSchemeHttp || baseUri.Scheme == Uri.UriSchemeHttps);
-
-            if (!uriResult)
-                throw new Exception("Url is not valid");
-
-            var username = connSplit[1];
-            var password = connSplit[2];
-
-            if (string.IsNullOrWhiteSpace(username))
-                throw new Exception("Username field is missing");
-
-            if (string.IsNullOrWhiteSpace(password))
-                throw new Exception("Password field is missing");
-
-            var auth64 = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{password}"));
-
-            client.BaseAddress = baseUri;
-            client.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Basic {auth64}");
-            client.DefaultRequestHeaders.CacheControl = CacheControlHeaderValue.Parse("no-cache");
-
-            return client;
         }
     }
 }

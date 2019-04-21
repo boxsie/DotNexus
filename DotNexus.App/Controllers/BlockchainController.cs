@@ -8,6 +8,7 @@ using DotNexus.Core.Accounts.Models;
 using DotNexus.Core.Enums;
 using DotNexus.Core.Ledger;
 using DotNexus.Core.Ledger.Models;
+using DotNexus.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -18,10 +19,10 @@ namespace DotNexus.App.Controllers
         private readonly LedgerService _ledgerService;
         private readonly AccountService _accountService;
 
-        public BlockchainController(LedgerService ledgerService, AccountService accountService)
+        public BlockchainController(INexusServiceFactory serviceFactory)
         {
-            _ledgerService = ledgerService;
-            _accountService = accountService;
+            _ledgerService = serviceFactory.Get<LedgerService>(HttpContext);
+            _accountService = serviceFactory.Get<AccountService>(HttpContext);
         }
 
         [Route("/blocks")]

@@ -28,27 +28,27 @@ namespace DotNexus.Tests
             Assert.True(!string.IsNullOrWhiteSpace(assetId?.Address));
         }
 
-        [Fact]
-        public async Task AssetService_CreateAssetRetrieveAsset_ReturnsAsset()
-        {
-            var user = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.UserCredential);
-            var assetId = await _clientFixture.AssetService.CreateAssetAsync(NexusServiceFixture.GetRandomAsset(), user);
-            var token = new CancellationTokenSource();
-            var notified = false;
+        //[Fact]
+        //public async Task AssetService_CreateAssetRetrieveAsset_ReturnsAsset()
+        //{
+        //    var user = await _clientFixture.AccountService.LoginAsync(NexusServiceFixture.UserCredential);
+        //    var assetId = await _clientFixture.AssetService.CreateAssetAsync(NexusServiceFixture.GetRandomAsset(), user);
+        //    var token = new CancellationTokenSource();
+        //    var notified = false;
 
-            _clientFixture.BlockNotify.Subscribe(async block =>
-            {
-                var asset = await _clientFixture.AssetService.GetAssetAsync(assetId, token.Token);
-                notified = true;
-                await _clientFixture.BlockNotify.StopAsync(token.Token);
-                Assert.True(!string.IsNullOrWhiteSpace(asset.Owner));
-            });
+        //    _clientFixture.BlockNotify.Subscribe(async block =>
+        //    {
+        //        var asset = await _clientFixture.AssetService.GetAssetAsync(assetId, token.Token);
+        //        notified = true;
+        //        await _clientFixture.BlockNotify.StopAsync(token.Token);
+        //        Assert.True(!string.IsNullOrWhiteSpace(asset.Owner));
+        //    });
 
-            await _clientFixture.BlockNotify.StartAsync(token.Token);
+        //    await _clientFixture.BlockNotify.StartAsync(token.Token);
 
-            while (!notified)
-                await Task.Delay(1, token.Token);
-        }
+        //    while (!notified)
+        //        await Task.Delay(1, token.Token);
+        //}
 
         //[Fact]
         //public async Task AssetService_CreateAssetCreateUserTransferAsset_AssetHistoryReflectsTransfer()
