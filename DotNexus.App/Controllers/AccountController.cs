@@ -34,7 +34,7 @@ namespace DotNexus.App.Controllers
 
             try
             {
-                await _userManager.UpdateLoggedInUser(HttpContext, new NexusUserCredential
+                await _userManager.LoginAsync(HttpContext, new NexusUserCredential
                 {
                     Username = viewModel.Username,
                     Password = viewModel.Password,

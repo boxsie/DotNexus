@@ -9,8 +9,7 @@ namespace DotNexus.Identity
     public interface IUserManager
     {
         Task CreateAccount(HttpContext httpContext, NexusUserCredential user, bool login = false, CancellationToken token = default);
-        Task LoginUser(HttpContext httpContext, NexusUserCredential user, bool isPersistent = false, CancellationToken token = default);
-        Task UpdateLoggedInUser(HttpContext httpContext, NexusUserCredential user, bool isPersistent = false, CancellationToken token = default);
+        Task LoginAsync(HttpContext httpContext, NexusUserCredential user, bool isPersistent = false, CancellationToken token = default);
         Task Logout(HttpContext httpContext);
         NexusUser GetCurrentUser(HttpContext httpContext);
     }

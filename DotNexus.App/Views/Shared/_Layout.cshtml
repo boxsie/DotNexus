@@ -46,6 +46,11 @@
                     </ul>
                 </div>
                 
+                <div class="d-inline-block mr-5">
+                    Node: '@User.FindFirst(NodeManager.NodeIdClaimType).Value' <br/>
+                    <a href="#">Disconnect</a>
+                </div>
+
                 <form asp-controller="search" asp-action="index" method="post" class="form-inline mr-md-4">
                     <input class="form-control mr-sm-2" type="search" placeholder="Search" name="searchTerm" id="searchTerm" aria-label="Search">
                     <button class="btn btn-outline-primary d-none d-sm-inline-block" type="submit">
