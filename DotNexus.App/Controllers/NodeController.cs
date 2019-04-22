@@ -8,8 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace DotNexus.App.Controllers
 {
     [Authorize]
-    public class TokenController : Controller
+    public class NodeController : Controller
     {
+        [Route("/node")]
         public IActionResult Index()
         {
             return View();

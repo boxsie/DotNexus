@@ -12,7 +12,7 @@ namespace DotNexus.Core.Tokens
 {
     public class TokenService : NexusService
     {
-        public TokenService(NexusNode node, ILogger log = null) : base(node, log) { }
+        public TokenService(NexusNode node, ILogger<NexusService> log) : base(node, log) { }
 
         public async Task<T> CreateTokenAsync<T>(T token, NexusUser user, CancellationToken cToken = default) where T : Token
         {

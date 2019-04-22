@@ -1,5 +1,20 @@
-﻿using DotNexus.Core.Nexus;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Security.Claims;
+using System.Threading;
+using System.Threading.Tasks;
+using DotNexus.Core.Accounts;
+using DotNexus.Core.Accounts.Models;
+using DotNexus.Core.Ledger;
+using DotNexus.Core.Nexus;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DotNexus.Identity
 {
@@ -7,24 +22,59 @@ namespace DotNexus.Identity
     {
         public const string NodeIdClaimType = "NodeId";
 
-        public NexusNodeParameters GetCurrentParameters(HttpContext context)
+        private readonly INexusEndpointRepository _repository;
+
+        public NodeManager(INexusEndpointRepository repository)
         {
-            return new NexusNodeParameters
-            {
-                Url = "http://serves:8080/;",
-                Username = "username",
-                Password = "password",
-                Settings = new NexusNodeSettings
-                {
-                    ApiSessions = true,
-                    IndexHeight = true
-                }
-            };
+            _repository = repository;
         }
 
-        public NexusNodeParameters GetNodeParameters(string nodeId)
+        public Task<NexusNodeEndpoint> GetCurrentEndpointAsync(HttpContext httpContext)
         {
-            throw new System.NotImplementedException();
+            if (!httpContext.User.Identity.IsAuthenticated)
+                return null;
+
+            var nodeIdClaim = httpContext.User.FindFirst(NodeIdClaimType);
+
+            return _repository.GetNodeAsync(nodeIdClaim.Value);
+        }
+
+        public Task<NexusNodeEndpoint> GetEndpointAsync(string nodeId)
+        {
+            return _repository.GetNodeAsync(nodeId);
+        }
+
+        public Task<IEnumerable<NexusNodeEndpoint>> GetAllEndpointsAsync()
+        {
+            return _repository.GetNodesAsync();
+        }
+
+        public async Task CreateAsync(NexusNodeEndpoint nodeEndpoint)
+        {
+            if (nodeEndpoint == null)
+                throw new ArgumentException("Node endpoint data is missing");
+
+            await _repository.CreateNodeAsync(nodeEndpoint);
+        }
+
+        public async Task<IdentityResult> LoginAsync(HttpContext httpContext, NexusNodeEndpoint nodeEndpoint, bool isPersistent = false, CancellationToken token = default)
+        {
+            if (httpContext.User.Identity.IsAuthenticated)
+                return IdentityResult.Failed(new IdentityError { Description = "Already signed in" });
+
+            var nexusNode = new NexusNode((INexusClient)httpContext.RequestServices.GetService(typeof(INexusClient)), nodeEndpoint);
+            var response = await nexusNode.Client.GetAsync("ledger/mininginfo", "Connection attempt", null, token, true);
+
+            if (!response.IsSuccessStatusCode)
+                return IdentityResult.Failed(new IdentityError { Description = "Unable to connect to node endpoint" });
+
+            var claims = new List<Claim> {new Claim(NodeIdClaimType, nodeEndpoint.Name)};
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+            return IdentityResult.Success;
         }
     }
 }

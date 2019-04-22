@@ -39,7 +39,7 @@ namespace Boxsie.Wrapplication.Logging
 
         private static string CreateMessage(string message, LogLevel lvl = LogLevel.Debug)
         {
-            return $"[{DateTime.Now:T}][{lvl.ToString()[0]}]:{message}";
+            return $"\n[{DateTime.Now:T}][{lvl.ToString()[0]}]:{message}";
         }
 
         private static void OutputToConsole(string logMsg)

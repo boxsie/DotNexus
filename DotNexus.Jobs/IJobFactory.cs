@@ -9,6 +9,6 @@ namespace DotNexus.Jobs
 {
     public interface IJobFactory
     {
-        Task<BlockNotifyJob> CreateBlockNotifyJob(NexusNodeParameters nodeParams, TimeSpan interval, Func<Block, Task> onNotify, CancellationToken token = default);
+        Task<BlockNotifyJob> CreateBlockNotifyJob(NexusNodeEndpoint endpoint, TimeSpan interval, Func<Block, Task> onNotify, CancellationToken token = default);
     }
 }

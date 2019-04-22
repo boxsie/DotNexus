@@ -11,14 +11,15 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DotNexus.App.Controllers
 {
+    [Authorize]
     public class AssetController : Controller
     {
-        private readonly AssetService _assetService;
+        private readonly INexusServiceFactory _serviceFactory;
         private readonly IUserManager _userManager;
 
         public AssetController(INexusServiceFactory serviceFactory, IUserManager userManager)
         {
-            _assetService = serviceFactory.Get<AssetService>(HttpContext);
+            _serviceFactory = serviceFactory;
             _userManager = userManager;
         }
 
@@ -56,7 +57,9 @@ namespace DotNexus.App.Controllers
                 Data = model.Data
             };
 
-            asset = await _assetService.CreateAssetAsync(asset, user);
+            var assetService = await _serviceFactory.GetAsync<AssetService>(HttpContext);
+
+            await assetService.CreateAssetAsync(asset, user);
             
             return RedirectToAction("index");
         }

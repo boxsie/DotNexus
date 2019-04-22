@@ -20,7 +20,7 @@ namespace DotNexus.App.Controllers
         public ManageController(IUserManager userManager, INexusServiceFactory serviceFactory)
         {
             _userManager = userManager;
-            _accountService = serviceFactory.Get<AccountService>(HttpContext);
+            _accountService = serviceFactory.GetAsync<AccountService>(HttpContext).GetAwaiter().GetResult();
         }
 
         public IActionResult Index()

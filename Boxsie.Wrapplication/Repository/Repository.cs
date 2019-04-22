@@ -8,70 +8,37 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
 using Boxsie.Wrapplication.Config;
-using Boxsie.Wrapplication.Data;
 using Boxsie.Wrapplication.Logging;
 using Dapper;
 using Microsoft.Extensions.Logging;
 
 namespace Boxsie.Wrapplication.Repository
 {
-    public class Repository<T> : IRepository<T> where T : IEntity
+    public class Repository<T> : IRepository<T>
     {
-        private readonly IBxLogger _logger;
+        private readonly ILogger<Repository<T>> _logger;
         private readonly string _connectionString;
-        private readonly Stopwatch _stopwatch;
+        private readonly string _tableName;
 
-        private string _tableName;
-
-        public Repository(IBxLogger logger, GeneralConfig config)
+        public Repository(ILogger<Repository<T>> logger, GeneralConfig config)
         {
             _logger = logger;
             _connectionString = $"Data Source={Path.Combine(config.UserConfig.UserDataPath, config.DbFilename)};";
-            _stopwatch = new Stopwatch();
+            _tableName = typeof(T).Name;
         }
 
-        public async Task CreateTable(string tableName)
+        public Task CreateTable()
         {
-            _tableName = tableName;
-
-            try
-            {
-                using (var con = new SQLiteConnection(_connectionString))
-                {
-                    await con.OpenAsync();
-
-                    await con.ExecuteAsync(BuildCreateSql());
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.WriteLine(e.Message, LogLevel.Warning);
-                throw;
-            }
+            return ExecuteAsync(BuildCreateSql());
         }
 
         public async Task<int> CreateAsync(T entity)
         {
-            try
-            {
-                var insertSql = BuildInsertSql();
-                var param = CreateParams(entity);
+            var insertSql = BuildInsertSql();
+            var param = CreateParams(entity);
 
-                using (var con = new SQLiteConnection(_connectionString))
-                {
-                    await con.OpenAsync();
-
-                    return await con.ExecuteAsync(insertSql, param);
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.WriteLine(e.Message, LogLevel.Warning);
-            }
-
-            return 0;
+            return await ExecuteAsync(insertSql, param);
         }
 
         public async Task<IEnumerable<int>> CreateAsync(IEnumerable<T> entities)
@@ -104,7 +71,7 @@ namespace Boxsie.Wrapplication.Repository
             }
             catch (Exception e)
             {
-                _logger.WriteLine(e.Message, LogLevel.Warning);
+                _logger.LogWarning(e.Message);
             }
             
             return new int[0];
@@ -122,69 +89,63 @@ namespace Boxsie.Wrapplication.Repository
             
             var sql = $"SELECT * FROM {_tableName} {whereSql}";
 
-            try
-            {
-                using (var con = new SQLiteConnection(_connectionString))
-                {
-                    await con.OpenAsync();
+            var dp = new DynamicParameters();
 
-                    var result = (await con.QueryAsync(sql, new { Val = whereClauses.Select(x => x.Val)})).Select(Mapper.Map<T>);
+            dp.Add("Val", whereClauses.Select(x => x.Val));
 
-                    return result;
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.WriteLine(e.Message, LogLevel.Warning);
-            }
-
-            return new List<T>();
+            return await QueryAsync(sql, dp);
         }
 
         public async Task<IEnumerable<T>> GetLastEntriesAsync(int limit = 0)
         {
-            var sql = $"SELECT * FROM {_tableName} t ORDER BY t.Timestamp DESC {(limit > 0 ? $"LIMIT {limit}" : "" )};";
+            var sql = $"SELECT * FROM {_tableName} t {(limit > 0 ? $"LIMIT {limit}" : "" )};";
 
-            try
-            {
-                using (var con = new SQLiteConnection(_connectionString))
-                {
-                    await con.OpenAsync();
-
-                    var result = (await con.QueryAsync(sql)).Select(Mapper.Map<T>);
-
-                    return result;
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.WriteLine(e.Message, LogLevel.Warning);
-            }
-
-            return default(IEnumerable<T>);
+            return await QueryAsync(sql);
         }
 
         public async Task<T> GetLastEntryAsync()
         {
-            var sql = $"SELECT * FROM {_tableName} t ORDER BY t.Timestamp DESC LIMIT 1";
+            var sql = $"SELECT * FROM {_tableName} t LIMIT 1";
 
+            return (await QueryAsync(sql)).FirstOrDefault();
+        }
+
+        private async Task<int> ExecuteAsync(string sql, DynamicParameters parameters = default)
+        {
             try
             {
                 using (var con = new SQLiteConnection(_connectionString))
                 {
                     await con.OpenAsync();
 
-                    var result = (await con.QueryAsync(sql)).Select(Mapper.Map<T>);
-
-                    return result.FirstOrDefault();
+                    return await con.ExecuteAsync(sql, parameters);
                 }
             }
             catch (Exception e)
             {
-                _logger.WriteLine(e.Message, LogLevel.Warning);
-            }
+                _logger.LogError(e.Message);
 
-            return default(T);
+                return 0;
+            }
+        }
+
+        private async Task<IEnumerable<T>> QueryAsync(string sql, DynamicParameters parameters = default)
+        {
+            try
+            {
+                using (var con = new SQLiteConnection(_connectionString))
+                {
+                    await con.OpenAsync();
+
+                    return await con.QueryAsync<T>(sql, parameters);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+
+                return default;
+            }
         }
 
         private static DynamicParameters CreateParams(T entity)
@@ -237,6 +198,7 @@ namespace Boxsie.Wrapplication.Repository
             {
                 case "Int32":
                 case "Int64":
+                case "Boolean":
                     return "int";
                 case "Double":
                     return "float";

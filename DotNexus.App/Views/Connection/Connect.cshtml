@@ -1,0 +1,50 @@
+﻿@model DotNexus.App.Models.HomeConnectViewModel
+
+@{
+    ViewData["Title"] = "Create connection";
+    Layout = "~/Views/Shared/_LayoutDisconnected.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="offset-sm-3 offset-lg-4 col-sm-6 col-lg-4">
+            <h1>Connect to Nexus</h1>
+
+            @if (Model.NexusNodeEndpointIds.Any())
+            {
+                foreach (var id in Model.NexusNodeEndpointIds)
+                {
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-7">
+                                    <h4>@id</h4>
+                                </div>
+                                <div class="col-2 text-right">
+                                    <a href="#">
+                                        <span class="fa fa-edit"></span>
+                                    </a>
+                                </div>
+                                <div class="col-3 text-right">
+                                    <form asp-controller="connection" asp-action="connect" method="post">
+                                        <input type="hidden" name="nodeId" value="@id" />
+                                        <button type="submit" class="btn btn-primary">Connect</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                }
+            }
+            else
+            {
+                <p>
+                    There are no saved Nexus connections. <br/>
+                    <a href="@Url.Action("create", "connection")">Create a new connection</a>.
+                </p>
+            }
+        </div>
+    </div>
+</div>
+

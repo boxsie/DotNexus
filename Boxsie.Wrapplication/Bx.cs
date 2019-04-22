@@ -25,8 +25,6 @@ namespace Boxsie.Wrapplication
             services.AddSingleton(typeof(IBxApp), typeof(T));
             
             services.AddLogging();
-            services.AddSingleton<IBxLogger, BxLogger>();
-            services.AddSingleton<ILogger, BxLogger>(x => (BxLogger)x.GetService<IBxLogger>());
 
             services.AddSingleton<RepositoryService>();
             services.AddSingleton<HttpClientFactory>();

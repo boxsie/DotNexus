@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using DotNexus.Core.Nexus;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,20 +18,20 @@ namespace DotNexus.Identity
             _nodeManager = nodeManager;
         }
 
-        public T Get<T>(HttpContext context) where T : NexusService
+        public async Task<T> GetAsync<T>(HttpContext context) where T : NexusService
         {
-            var nexusNode = new NexusNode(_serviceProvider.GetService<INexusClient>(), _nodeManager.GetCurrentParameters(context));
+            var nexusNode = new NexusNode(_serviceProvider.GetService<INexusClient>(), await _nodeManager.GetCurrentEndpointAsync(context));
 
-            var service = Activator.CreateInstance(typeof(T), nexusNode, _serviceProvider.GetService<ILogger>());
+            var service = Activator.CreateInstance(typeof(T), nexusNode, _serviceProvider.GetService<ILogger<NexusService>>());
 
             return (T)service;
         }
 
-        public T Get<T>(NexusNodeParameters nodeParams) where T : NexusService
+        public T Get<T>(NexusNodeEndpoint nodeEndpoint) where T : NexusService
         {
-            var nexusNode = new NexusNode(_serviceProvider.GetService<INexusClient>(), nodeParams);
+            var nexusNode = new NexusNode(_serviceProvider.GetService<INexusClient>(), nodeEndpoint);
 
-            var service = Activator.CreateInstance(typeof(T), nexusNode, _serviceProvider.GetService<ILogger>());
+            var service = Activator.CreateInstance(typeof(T), nexusNode, _serviceProvider.GetService<ILogger<NexusService>>());
 
             return (T)service;
         }

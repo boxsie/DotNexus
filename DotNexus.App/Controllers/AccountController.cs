@@ -5,10 +5,12 @@ using System.Threading.Tasks;
 using DotNexus.App.Models;
 using DotNexus.Core.Accounts.Models;
 using DotNexus.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DotNexus.App.Controllers
 {
+    [Authorize]
     public class AccountController : Controller
     {
         private readonly IUserManager _userManager;
@@ -32,7 +34,7 @@ namespace DotNexus.App.Controllers
 
             try
             {
-                await _userManager.LoginUser(HttpContext, new NexusUserCredential
+                await _userManager.UpdateLoggedInUser(HttpContext, new NexusUserCredential
                 {
                     Username = viewModel.Username,
                     Password = viewModel.Password,
@@ -40,7 +42,7 @@ namespace DotNexus.App.Controllers
                 });
                 
                 if (string.IsNullOrWhiteSpace(returnUrl) || !Url.IsLocalUrl(returnUrl))
-                    return RedirectToAction("index", "home");
+                    return RedirectToAction("index", "node");
                 else
                     return Redirect(returnUrl);
             }
@@ -65,7 +67,7 @@ namespace DotNexus.App.Controllers
                 ModelState.AddModelError("summary", e.Message);
             }
 
-            return RedirectToAction("index", "home");
+            return RedirectToAction("index", "node");
         }
 
         public IActionResult Create()
@@ -91,7 +93,7 @@ namespace DotNexus.App.Controllers
 
                 await _userManager.CreateAccount(HttpContext, cred, model.AutoLogin);
 
-                return RedirectToAction("index", "home");
+                return RedirectToAction("index", "node");
             }
             catch (Exception e)
             {

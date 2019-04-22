@@ -21,7 +21,7 @@ namespace Boxsie.Wrapplication.Config
         private static readonly string ConfigJsonPath = Path.Combine("Config", "Json");
 
         private static string _appDataPath;
-        private static IBxLogger _logger;
+        private static ILogger<IConfig> _logger;
         private static Dictionary<Type, IConfig> _configs;
         private static bool IsDebug
         {
@@ -49,15 +49,15 @@ namespace Boxsie.Wrapplication.Config
             
             var userDataPath = GetConfig<GeneralConfig>().UserConfig.UserDataPath;
 
-            _logger = serviceProvider.GetService<IBxLogger>();
-            _logger.WriteLine($"Application data path set to {_appDataPath}", LogLevel.Debug);
-            _logger.WriteLine($"General user data load complete", LogLevel.Information);
-            _logger.WriteLine($"User data path set to {userDataPath}");
+            _logger = serviceProvider.GetService<ILogger<IConfig>>();
+            _logger.LogDebug($"Application data path set to {_appDataPath}");
+            _logger.LogInformation($"General user data load complete");
+            _logger.LogDebug($"User data path set to {userDataPath}");
 
             if (Directory.Exists(userDataPath))
                 return;
 
-            _logger.WriteLine($"Application data directory not found, creating...", LogLevel.Debug);
+            _logger.LogDebug($"Application data directory not found, creating...");
 
             Directory.CreateDirectory(userDataPath);
         }
@@ -69,7 +69,7 @@ namespace Boxsie.Wrapplication.Config
             if (_configs.ContainsKey(tType))
                 return (T)_configs[tType];
 
-            _logger.WriteLine($"Unable to get {tType}", LogLevel.Warning);
+            _logger.LogWarning($"Unable to get {tType}");
 
             return default(T);
         }

@@ -7,7 +7,6 @@ using DotNexus.Core.Accounts;
 using DotNexus.Core.Accounts.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 
 namespace DotNexus.Identity
@@ -29,7 +28,9 @@ namespace DotNexus.Identity
 
         public async Task CreateAccount(HttpContext httpContext, NexusUserCredential user, bool login = false, CancellationToken token = default)
         {
-            var genesisId = await _serviceFactory.Get<AccountService>(httpContext).CreateAccountAsync(user, token);
+            var accountService = await _serviceFactory.GetAsync<AccountService>(httpContext);
+
+            var genesisId = await accountService.CreateAccountAsync(user, token);
 
             if (genesisId != null && login)
                 await LoginUser(httpContext, user, false, token);
@@ -37,7 +38,12 @@ namespace DotNexus.Identity
 
         public async Task LoginUser(HttpContext httpContext, NexusUserCredential user, bool isPersistent = false, CancellationToken token = default)
         {
-            var nexusUser = await _serviceFactory.Get<AccountService>(httpContext).LoginAsync(user, token);
+            if (httpContext.User.Identity.IsAuthenticated)
+                return;
+
+            var accountService = await _serviceFactory.GetAsync<AccountService>(httpContext);
+
+            var nexusUser = await accountService.LoginAsync(user, token);
 
             if (nexusUser == null)
                 return;
@@ -59,7 +65,9 @@ namespace DotNexus.Identity
             if (!httpContext.User.Identity.IsAuthenticated)
                 return;
 
-            var nexusUser = await _serviceFactory.Get<AccountService>(httpContext).LoginAsync(user, token);
+            var accountService = await _serviceFactory.GetAsync<AccountService>(httpContext);
+
+            var nexusUser = await accountService.LoginAsync(user, token);
 
             if (nexusUser == null)
                 return;
@@ -78,7 +86,10 @@ namespace DotNexus.Identity
             var session = httpContext.Session.GetString(SessionIdKey);
 
             if (!string.IsNullOrEmpty(session))
-                await _serviceFactory.Get<AccountService>(httpContext).LogoutAsync(session);
+            {
+                var accountService = await _serviceFactory.GetAsync<AccountService>(httpContext);
+                await accountService.LogoutAsync(session);
+            }
 
             await httpContext.SignOutAsync();
         }

@@ -12,7 +12,7 @@ namespace DotNexus.Core.Accounts
 {
     public class AccountService : NexusService
     {
-        public AccountService(NexusNode node, ILogger log = null) : base(node, log) { }
+        public AccountService(NexusNode node, ILogger<NexusService> log) : base(node, log) { }
 
         public async Task<GenesisId> CreateAccountAsync(NexusUserCredential userCredential, CancellationToken token = default)
         {
@@ -82,7 +82,7 @@ namespace DotNexus.Core.Accounts
         {
             token.ThrowIfCancellationRequested();
 
-            if (NodeSettings.ApiSessions)
+            if (ApiSessions)
                 throw new InvalidOperationException("Cannot lock with API sessions enabled");
 
             var request = new NexusRequest(new Dictionary<string, string> {{"session", sessionId}} );
@@ -94,7 +94,7 @@ namespace DotNexus.Core.Accounts
         {
             token.ThrowIfCancellationRequested();
 
-            if (NodeSettings.ApiSessions)
+            if (ApiSessions)
                 throw new InvalidOperationException("Cannot unlock with API sessions enabled");
 
             if (pin.ToString().Length < 4)
