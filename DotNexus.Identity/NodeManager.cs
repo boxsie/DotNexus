@@ -76,5 +76,10 @@ namespace DotNexus.Identity
 
             return IdentityResult.Success;
         }
+
+        public async Task LogoutAsync(HttpContext httpContext)
+        {
+            await httpContext.SignOutAsync();
+        }
     }
 }

@@ -26,7 +26,7 @@ namespace Boxsie.Wrapplication.Logging
             {
                 var logMsg = CreateMessage(message, lvl);
 
-                OutputToConsole(logMsg);
+                OutputToConsole(logMsg, lvl);
 
                 SaveToDisk(GetLogfilename(), logMsg);
             }
@@ -39,11 +39,27 @@ namespace Boxsie.Wrapplication.Logging
 
         private static string CreateMessage(string message, LogLevel lvl = LogLevel.Debug)
         {
-            return $"\n[{DateTime.Now:T}][{lvl.ToString()[0]}]:{message}";
+            return $"[{DateTime.Now:T}][{lvl.ToString()[0]}]:{message}\r";
         }
 
-        private static void OutputToConsole(string logMsg)
+        private static void OutputToConsole(string logMsg, LogLevel lvl)
         {
+            switch (lvl)
+            {
+                case LogLevel.Warning:
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    break;
+                case LogLevel.Error:
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    break;
+                case LogLevel.Critical:
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    break;
+                default:
+                    Console.ForegroundColor = ConsoleColor.White;
+                    break;
+            }
+
             Console.WriteLine(logMsg);
         }
 

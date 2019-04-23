@@ -14,5 +14,6 @@ namespace DotNexus.Identity
         Task<IEnumerable<NexusNodeEndpoint>> GetAllEndpointsAsync();
         Task CreateAsync(NexusNodeEndpoint nodeEndpoint);
         Task<IdentityResult> LoginAsync(HttpContext httpContext, NexusNodeEndpoint nodeEndpoint, bool isPersistent = false, CancellationToken token = default);
+        Task LogoutAsync(HttpContext httpContext);
     }
 }

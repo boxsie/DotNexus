@@ -60,7 +60,7 @@ namespace DotNexus.App.Controllers
         {
             try
             {
-                await _userManager.Logout(HttpContext);
+                await _userManager.LogoutAsync(HttpContext);
             }
             catch (Exception e)
             {

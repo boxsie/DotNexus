@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading;
@@ -8,6 +9,7 @@ using DotNexus.Core.Accounts.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace DotNexus.Identity
 {
@@ -19,10 +21,12 @@ namespace DotNexus.Identity
         public const string GenesisIdKey = "GenesisId";
         public const string UsernameKey = "Username";
 
+        private readonly ILogger<UserManager> _log;
         private readonly INexusServiceFactory _serviceFactory;
 
-        public UserManager(INexusServiceFactory serviceFactory)
+        public UserManager(ILogger<UserManager> log, INexusServiceFactory serviceFactory)
         {
+            _log = log;
             _serviceFactory = serviceFactory;
         }
 
@@ -64,24 +68,31 @@ namespace DotNexus.Identity
             }
         }
 
-        public async Task Logout(HttpContext httpContext)
+        public async Task LogoutAsync(HttpContext httpContext)
         {
-            var session = httpContext.Session.GetString(SessionIdKey);
-
-            if (!string.IsNullOrEmpty(session))
+            try
             {
-                var accountService = await _serviceFactory.GetAsync<AccountService>(httpContext);
-                await accountService.LogoutAsync(session);
-            }
+                var session = httpContext.Session.GetString(SessionIdKey);
 
-            if (httpContext.User.Identity.IsAuthenticated)
+                if (!string.IsNullOrEmpty(session))
+                {
+                    var accountService = await _serviceFactory.GetAsync<AccountService>(httpContext);
+                    await accountService.LogoutAsync(session);
+                }
+
+                if (httpContext.User.Identity.IsAuthenticated)
+                {
+                    RemoveUserClaims(((ClaimsIdentity)httpContext.User.Identity));
+
+                    await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, httpContext.User);
+                }
+                else
+                    await httpContext.SignOutAsync();
+            }
+            catch (Exception e)
             {
-                RemoveUserClaims(((ClaimsIdentity) httpContext.User.Identity));
-
-                await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, httpContext.User);
+                _log.LogWarning($"There was an error logging out - {e.Message}");
             }
-            else
-                await httpContext.SignOutAsync();
         }
 
         public NexusUser GetCurrentUser(HttpContext httpContext)
@@ -122,8 +133,15 @@ namespace DotNexus.Identity
 
         private static void RemoveUserClaims(ClaimsIdentity user)
         {
-            user.RemoveClaim(user.FindFirst(ClaimTypes.Name));
-            user.RemoveClaim(user.FindFirst(NodeAuthClaimType));
+            var nClaim = user.FindFirst(ClaimTypes.Name);
+
+            if (nClaim != null)
+                user.RemoveClaim(nClaim);
+
+            var aClaim = user.FindFirst(NodeAuthClaimType);
+
+            if (aClaim != null)
+                user.RemoveClaim(aClaim);
         }
     }
 }

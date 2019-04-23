@@ -10,7 +10,7 @@ namespace DotNexus.Identity
     {
         Task CreateAccount(HttpContext httpContext, NexusUserCredential user, bool login = false, CancellationToken token = default);
         Task LoginAsync(HttpContext httpContext, NexusUserCredential user, bool isPersistent = false, CancellationToken token = default);
-        Task Logout(HttpContext httpContext);
+        Task LogoutAsync(HttpContext httpContext);
         NexusUser GetCurrentUser(HttpContext httpContext);
     }
 }

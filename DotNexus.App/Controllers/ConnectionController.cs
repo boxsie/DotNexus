@@ -12,10 +12,12 @@ namespace DotNexus.App.Controllers
     public class ConnectionController : Controller
     {
         private readonly INodeManager _nodeManager;
+        private readonly IUserManager _userManager;
 
-        public ConnectionController(INodeManager nodeManager)
+        public ConnectionController(INodeManager nodeManager, IUserManager userManager)
         {
             _nodeManager = nodeManager;
+            _userManager = userManager;
         }
         
         public async Task<IActionResult> Connect()
@@ -53,6 +55,16 @@ namespace DotNexus.App.Controllers
                 return RedirectToAction("index", "node");
             
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Disconnect()
+        {
+            await _userManager.LogoutAsync(HttpContext);
+            await _nodeManager.LogoutAsync(HttpContext);
+
+            return RedirectToAction("connect", "connection");
         }
 
         [HttpPost]
