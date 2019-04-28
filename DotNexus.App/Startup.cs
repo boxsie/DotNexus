@@ -1,9 +1,13 @@
 ﻿using System;
 using Boxsie.Wrapplication;
+using Boxsie.Wrapplication.Config;
 using Boxsie.Wrapplication.Repository;
+using DotNexus.App.Config;
 using DotNexus.App.Domain;
 using DotNexus.App.Hubs;
+using DotNexus.Core.Assets.Models;
 using DotNexus.Core.Nexus;
+using DotNexus.Core.Tokens.Models;
 using DotNexus.Identity;
 using DotNexus.Jobs;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -42,6 +46,21 @@ namespace DotNexus.App
                 options.Cookie.Name = ".DotNexus.App.Session";
             });
 
+            services.AddSingleton(x =>
+            {
+                var config = x.GetService<CookieConfig>();
+
+                return new CookieConstants
+                {
+                    GenesisIdKey = config.GenesisIdKey,
+                    NodeAuthClaimResult = config.NodeAuthClaimResult,
+                    NodeAuthClaimType = config.NodeAuthClaimType,
+                    SessionIdKey = config.SessionIdKey,
+                    UsernameKey = config.UsernameKey,
+                    NodeIdClaimType = config.NodeIdClaimType
+                };
+            });
+            
             services.AddMvc();
 
             //services.AddSingleton<NexusNodeEndpoint>(new NexusNodeEndpoint
@@ -53,17 +72,25 @@ namespace DotNexus.App
             //    IndexHeight = true
             //});
 
+            // Factorys
+            services.AddTransient<INexusServiceFactory, NexusServiceFactory>();
+            services.AddTransient<IJobFactory, JobFactory>();
+
+            // Connection
             services.AddHttpClient<INexusClient, NexusClient>();
             services.AddTransient<NexusNode>();
             services.AddTransient<INodeManager, NodeManager>();
             services.AddTransient<IUserManager, UserManager>();
+
+            // Repositories
             services.AddTransient<INexusEndpointRepository, NexusEndpointRepository>();
             services.AddTransient<IRepository<NexusNodeEndpoint>, Repository<NexusNodeEndpoint>>();
-            services.AddTransient<INexusServiceFactory, NexusServiceFactory>();
-            services.AddTransient<IJobFactory, JobFactory>();
-            services.AddSingleton<BlockhainHubContext>();
+            services.AddTransient<IRepository<Asset>, Repository<Asset>>();
+            services.AddTransient<IRepository<Token>, Repository<Token>>();
 
-            services.AddDistributedMemoryCache();
+            // Hubs
+            services.AddSingleton<BlockhainHubMessenger>();
+
 #if DEBUG
             services.AddSignalR(o => { o.EnableDetailedErrors = true; });
 #else
@@ -94,14 +121,12 @@ namespace DotNexus.App
 
             app.UseMvc(routes =>
             {
-                routes.MapRoute("block", "block/{blockId}", new { controller = "blockchain", action = "block" });
-                routes.MapRoute("transaction", "transaction/{hash}", new { controller = "blockchain", action = "transaction" });
-                routes.MapRoute("genesis", "genesis/{hash}", new { controller = "blockchain", action = "genesis" });
                 routes.MapRoute("default", "{controller=connection}/{action=connect}");
             });
             
-            serviceProvider.GetService<BlockhainHubContext>();
             serviceProvider.RegisterEntity<NexusNodeEndpoint>();
+            serviceProvider.RegisterEntity<Asset>();
+            serviceProvider.RegisterEntity<Token>();
         }
     }
 }

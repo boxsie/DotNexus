@@ -9,6 +9,7 @@ export * from './blockchain.block';
 export * from './blockchain.blocks';
 export * from './blockchain.transaction';
 export * from './blockchain.genesis';
+export * from './asset.index';
 
 import '../Styles/layout.scss';
 import '../Images/logo.png';

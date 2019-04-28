@@ -20,13 +20,17 @@ namespace DotNexus.Identity
 {
     public class NodeManager : INodeManager
     {
-        public const string NodeIdClaimType = "NodeId";
+        public static string NodeIdClaimType { get; private set; }
 
         private readonly INexusEndpointRepository _repository;
+        private readonly CookieConstants _cookeConstants;
 
-        public NodeManager(INexusEndpointRepository repository)
+        public NodeManager(INexusEndpointRepository repository, CookieConstants cookeConstants)
         {
             _repository = repository;
+            _cookeConstants = cookeConstants;
+
+            NodeIdClaimType = _cookeConstants.NodeIdClaimType;
         }
 
         public Task<NexusNodeEndpoint> GetCurrentEndpointAsync(HttpContext httpContext)
@@ -34,7 +38,7 @@ namespace DotNexus.Identity
             if (!httpContext.User.Identity.IsAuthenticated)
                 return null;
 
-            var nodeIdClaim = httpContext.User.FindFirst(NodeIdClaimType);
+            var nodeIdClaim = httpContext.User.FindFirst(_cookeConstants.NodeIdClaimType);
 
             return _repository.GetNodeAsync(nodeIdClaim.Value);
         }
@@ -68,7 +72,7 @@ namespace DotNexus.Identity
             if (!response.IsSuccessStatusCode)
                 return IdentityResult.Failed(new IdentityError { Description = "Unable to connect to node endpoint" });
 
-            var claims = new List<Claim> {new Claim(NodeIdClaimType, nodeEndpoint.Name)};
+            var claims = new List<Claim> {new Claim(_cookeConstants.NodeIdClaimType, nodeEndpoint.Name)};
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
 

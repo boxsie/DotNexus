@@ -1,22 +1,21 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using DotNexus.Core.Ledger.Models;
+using DotNexus.Core.Assets.Models;
 
 namespace DotNexus.App.Models
 {
-    public class BlockchainBlocksViewModel
-    {
-        public List<Block> LatestBlocks { get; set; }
-    }
-
     public class HomeConnectViewModel
     {
         public List<string> NexusNodeEndpointIds { get; set; }
     }
 
-    public class ConnectionConnectModel
+    public class AssetDetailsViewModel
     {
-        [Required]
-        public string NodeId { get; set; }
+        public AssetInfo AssetInfo { get; set; }
+        public List<AssetInfo> AssetHistory { get; set; }
+    }
+
+    public class TokenDetailsViewModel
+    {
+
     }
 }

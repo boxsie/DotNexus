@@ -1,4 +1,5 @@
-﻿
+﻿@model DotNexus.App.Models.AssetIndexViewModel
+
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -10,8 +11,48 @@
             <h1>Assets</h1>
         </div>
         <div class="col-6 text-right">
-            <a href="@Url.Action("create", "asset")" class="btn btn-primary">Create</a>
+            <a href="@Url.Action("create", "asset")" class="btn btn-primary">Create asset</a>
         </div>
     </div>
+
+    <asset-table id="assetTable" ref="assetTable" :options="dtOptions">
+        <template #dt="slotProps">
+            <div class="row dt-row d-none d-lg-flex">
+                <div class="col-4 col-lg-2 order-1">
+                    <h3>Name</h3>
+                </div>
+                <div class="col-12 col-lg-7 order-3 order-lg-2">
+                    <h3>Address</h3>
+                </div>
+                <div class="col-8 col-lg-3 order-2 order-lg-3 text-right">
+                    <h3>Created</h3>
+                </div>
+            </div>
+
+            <div v-if="slotProps.dt.tableData.totalItems === 0" class="text-center">
+                <hr />
+                There are no results
+                <hr />
+            </div>
+            <div v-else v-for="(row, i) in slotProps.dt.tableData.pageItems" :class="(i + 1) % 2 === 0 ? 'row dt-row' : 'row dt-row odd-row'">
+                <div class="col-4 col-lg-2 order-1">
+                    {{row.name}}
+                </div>
+                <div class="col-12 col-lg-7 order-3 order-lg-2">
+                    <a class="text-break" :href="`/asset/details/${row.address}`">{{row.address}}</a>
+                </div>
+                <div class="col-8 col-lg-3 order-2 order-lg-3 text-right">
+                    <a :href="`/transaction/${row.txId}`">{{formatDate(row.createdOn)}}</a>
+                </div>
+            </div>
+        </template>
+    </asset-table>
 </div>
 
+@section Scripts {
+    <script type="text/javascript">
+        window.vm = new dotnexus.AssetIndex({
+            assets: @Json.Serialize(Model.UserAssets)
+        });
+    </script>
+}

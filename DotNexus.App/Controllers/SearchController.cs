@@ -20,7 +20,7 @@ namespace DotNexus.App.Controllers
             var isNumber = int.TryParse(searchTerm, out var height);
 
             if (isNumber)
-                return RedirectToRoute("block", new { blockId = height });
+                return RedirectToAction("block", "blockchain", new { blockId = height });
             
             return View();
         }

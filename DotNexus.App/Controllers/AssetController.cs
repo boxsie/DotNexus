@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Boxsie.Wrapplication.Repository;
 using DotNexus.App.Models;
 using DotNexus.Core.Assets;
 using DotNexus.Core.Assets.Models;
 using DotNexus.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace DotNexus.App.Controllers
 {
@@ -16,21 +18,41 @@ namespace DotNexus.App.Controllers
     {
         private readonly INexusServiceFactory _serviceFactory;
         private readonly IUserManager _userManager;
+        private readonly IRepository<Asset> _assetRepository;
 
-        public AssetController(INexusServiceFactory serviceFactory, IUserManager userManager)
+        public AssetController(INexusServiceFactory serviceFactory, IUserManager userManager, IRepository<Asset> assetRepository)
         {
             _serviceFactory = serviceFactory;
             _userManager = userManager;
+            _assetRepository = assetRepository;
         }
 
-        public IActionResult Index()
+        [Route("/asset")]
+        [NexusAuthorize]
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var assets = User.IsNexusAuthorised() 
+                ? (await _assetRepository.GetWhereAsync(new List<WhereClause> { new WhereClause("Genesis", "=", User.Identity.Name) })).ToList()
+                : null;
+
+            return View(new AssetIndexViewModel
+            {
+                UserAssets = assets
+            });
         }
 
-        public IActionResult Details(string assetAddress)
+        [Route("/asset/details/{address}")]
+        public async Task<IActionResult> Details(string address)
         {
-            return View();
+            var asset = new Asset { Address = address };
+            var assetService = await _serviceFactory.GetAsync<AssetService>(HttpContext);
+            var history = await assetService.GetAssetHistoryAsync(asset);
+
+            return View(new AssetDetailsViewModel
+            {
+                AssetInfo = await assetService.GetAssetAsync(asset),
+                AssetHistory = history.ToList()
+            });
         }
 
         [NexusAuthorize]
@@ -40,8 +62,8 @@ namespace DotNexus.App.Controllers
         }
 
         [HttpPost]
-        [NexusAuthorize]
         [ValidateAntiForgeryToken]
+        [NexusAuthorize]
         public async Task<IActionResult> Create(CreateAssetViewModel model)
         {
             if (!ModelState.IsValid)
@@ -59,7 +81,9 @@ namespace DotNexus.App.Controllers
 
             var assetService = await _serviceFactory.GetAsync<AssetService>(HttpContext);
 
-            await assetService.CreateAssetAsync(asset, user);
+            var newAsset = await assetService.CreateAssetAsync(asset, user);
+
+            await _assetRepository.CreateAsync(newAsset);
             
             return RedirectToAction("index");
         }

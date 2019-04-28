@@ -1,3 +1,86 @@
+.dt-wrapper {
+  position: relative;
+  margin-top: 20px; }
+
+.data-table {
+  position: relative;
+  padding-left: 0;
+  padding-right: 0; }
+  .data-table .dt-body {
+    min-height: 150px; }
+    .data-table .dt-body .dt-row {
+      padding-top: 8px;
+      padding-bottom: 8px;
+      cursor: pointer; }
+      .data-table .dt-body .dt-row.row-index {
+        position: relative;
+        padding-left: 30px; }
+        .data-table .dt-body .dt-row.row-index .index {
+          position: absolute;
+          left: 0;
+          text-align: center;
+          width: 30px;
+          top: 49%;
+          transform: translateY(-50%); }
+          .data-table .dt-body .dt-row.row-index .index strong {
+            font-size: 12px; }
+      .data-table .dt-body .dt-row.odd-row {
+        background-color: #f2f2f2; }
+    .data-table .dt-body .dt-col, .data-table .dt-body .dt-head {
+      padding: 5px; }
+  .data-table .dt-controls {
+    margin-top: 15px;
+    text-align: center; }
+    .data-table .dt-controls label, .data-table .dt-controls select {
+      display: inline; }
+    .data-table .dt-controls .total-results {
+      font-weight: 200;
+      font-size: 16px; }
+    .data-table .dt-controls .paging {
+      display: flex;
+      justify-content: center;
+      padding-left: 0;
+      list-style: none;
+      border-radius: 4px;
+      margin: 2px 0;
+      white-space: nowrap; }
+      .data-table .dt-controls .paging li a {
+        position: relative;
+        display: block;
+        padding: 8px 10px;
+        margin-left: -1px;
+        line-height: 1.25;
+        color: #6362bb;
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        text-decoration: none; }
+        .data-table .dt-controls .paging li a.active {
+          background-color: #6362bb;
+          color: #fff; }
+          .data-table .dt-controls .paging li a.active:hover {
+            cursor: default; }
+        .data-table .dt-controls .paging li a.enabled:hover {
+          color: #403f91;
+          background-color: #e9ecef;
+          border-color: #dee2e6; }
+        .data-table .dt-controls .paging li a.disabled:hover {
+          cursor: default; }
+
+@media (min-width: 768px) {
+  .data-table {
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-left: 0;
+    margin-right: 0; }
+    .data-table .row {
+      margin-left: -15px;
+      margin-right: -15px; }
+    .data-table .data-table-col, .data-table .data-table-head {
+      padding: 12px; }
+    .data-table .dt-controls {
+      text-align: left; }
+      .data-table .dt-controls .paging {
+        justify-content: flex-end; } }
 .preloader-container {
   position: absolute;
   top: 0;
@@ -100,89 +183,6 @@
 .fade-enter,
 .fade-leave-to {
   opacity: 0; }
-.dt-wrapper {
-  position: relative;
-  margin-top: 20px; }
-
-.data-table {
-  position: relative;
-  padding-left: 0;
-  padding-right: 0; }
-  .data-table .dt-body {
-    min-height: 150px; }
-    .data-table .dt-body .dt-row {
-      padding-top: 8px;
-      padding-bottom: 8px;
-      cursor: pointer; }
-      .data-table .dt-body .dt-row.row-index {
-        position: relative;
-        padding-left: 30px; }
-        .data-table .dt-body .dt-row.row-index .index {
-          position: absolute;
-          left: 0;
-          text-align: center;
-          width: 30px;
-          top: 49%;
-          transform: translateY(-50%); }
-          .data-table .dt-body .dt-row.row-index .index strong {
-            font-size: 12px; }
-      .data-table .dt-body .dt-row.odd-row {
-        background-color: #f2f2f2; }
-    .data-table .dt-body .dt-col, .data-table .dt-body .dt-head {
-      padding: 5px; }
-  .data-table .dt-controls {
-    margin-top: 15px;
-    text-align: center; }
-    .data-table .dt-controls label, .data-table .dt-controls select {
-      display: inline; }
-    .data-table .dt-controls .total-results {
-      font-weight: 200;
-      font-size: 16px; }
-    .data-table .dt-controls .paging {
-      display: flex;
-      justify-content: center;
-      padding-left: 0;
-      list-style: none;
-      border-radius: 4px;
-      margin: 2px 0;
-      white-space: nowrap; }
-      .data-table .dt-controls .paging li a {
-        position: relative;
-        display: block;
-        padding: 8px 10px;
-        margin-left: -1px;
-        line-height: 1.25;
-        color: #6362bb;
-        background-color: #fff;
-        border: 1px solid #dee2e6;
-        text-decoration: none; }
-        .data-table .dt-controls .paging li a.active {
-          background-color: #6362bb;
-          color: #fff; }
-          .data-table .dt-controls .paging li a.active:hover {
-            cursor: default; }
-        .data-table .dt-controls .paging li a.enabled:hover {
-          color: #403f91;
-          background-color: #e9ecef;
-          border-color: #dee2e6; }
-        .data-table .dt-controls .paging li a.disabled:hover {
-          cursor: default; }
-
-@media (min-width: 768px) {
-  .data-table {
-    padding-left: 15px;
-    padding-right: 15px;
-    margin-left: 0;
-    margin-right: 0; }
-    .data-table .row {
-      margin-left: -15px;
-      margin-right: -15px; }
-    .data-table .data-table-col, .data-table .data-table-head {
-      padding: 12px; }
-    .data-table .dt-controls {
-      text-align: left; }
-      .data-table .dt-controls .paging {
-        justify-content: flex-end; } }
 /*!
  *  Font Awesome 4.7.0 by @davegandy - http://fontawesome.io - @fontawesome
  *  License - http://fontawesome.io/license (Font: SIL OFL 1.1, CSS: MIT License)

@@ -15,19 +15,21 @@ namespace DotNexus.Identity
 {
     public class UserManager : IUserManager
     {
-        public const string NodeAuthClaimType = "NodeAuth";
-        public const string NodeAuthClaimResult = "Autherised";
-        public const string SessionIdKey = "SessionId";
-        public const string GenesisIdKey = "GenesisId";
-        public const string UsernameKey = "Username";
+        public static string NodeAuthClaimType { get; private set; }
+        public static string NodeAuthClaimResult { get; private set; }
 
         private readonly ILogger<UserManager> _log;
         private readonly INexusServiceFactory _serviceFactory;
+        private readonly CookieConstants _cookieConstants;
 
-        public UserManager(ILogger<UserManager> log, INexusServiceFactory serviceFactory)
+        public UserManager(ILogger<UserManager> log, INexusServiceFactory serviceFactory, CookieConstants cookieConstants)
         {
             _log = log;
             _serviceFactory = serviceFactory;
+            _cookieConstants = cookieConstants;
+
+            NodeAuthClaimType = _cookieConstants.NodeAuthClaimType;
+            NodeAuthClaimResult = cookieConstants.NodeAuthClaimResult;
         }
 
         public async Task CreateAccount(HttpContext httpContext, NexusUserCredential user, bool login = false, CancellationToken token = default)
@@ -51,9 +53,9 @@ namespace DotNexus.Identity
 
             nexusUser.Username = user.Username;
 
-            httpContext.Session.SetString(GenesisIdKey, nexusUser.GenesisId.Genesis);
-            httpContext.Session.SetString(SessionIdKey, nexusUser.GenesisId.Session);
-            httpContext.Session.SetString(UsernameKey, nexusUser.Username);
+            httpContext.Session.SetString(_cookieConstants.GenesisIdKey, nexusUser.GenesisId.Genesis);
+            httpContext.Session.SetString(_cookieConstants.SessionIdKey, nexusUser.GenesisId.Session);
+            httpContext.Session.SetString(_cookieConstants.UsernameKey, nexusUser.Username);
 
             if (httpContext.User.Identity.IsAuthenticated)
             {
@@ -72,7 +74,7 @@ namespace DotNexus.Identity
         {
             try
             {
-                var session = httpContext.Session.GetString(SessionIdKey);
+                var session = httpContext.Session.GetString(_cookieConstants.SessionIdKey);
 
                 if (!string.IsNullOrEmpty(session))
                 {
@@ -102,9 +104,9 @@ namespace DotNexus.Identity
 
             var genesisClaim = httpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
             
-            var genesisId = httpContext.Session.GetString(GenesisIdKey);
-            var sessionId = httpContext.Session.GetString(SessionIdKey);
-            var username = httpContext.Session.GetString(UsernameKey);
+            var genesisId = httpContext.Session.GetString(_cookieConstants.GenesisIdKey);
+            var sessionId = httpContext.Session.GetString(_cookieConstants.SessionIdKey);
+            var username = httpContext.Session.GetString(_cookieConstants.UsernameKey);
 
             if (string.IsNullOrEmpty(genesisId) || string.IsNullOrEmpty(sessionId) || genesisClaim == null || genesisClaim.Value != genesisId)
                 return null;
@@ -120,25 +122,25 @@ namespace DotNexus.Identity
             };
         }
 
-        private static IEnumerable<Claim> AddUserClaims(NexusUser user)
+        private IEnumerable<Claim> AddUserClaims(NexusUser user)
         {
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.GenesisId.Genesis),
-                new Claim(NodeAuthClaimType, NodeAuthClaimResult)
+                new Claim(_cookieConstants.NodeAuthClaimType, _cookieConstants.NodeAuthClaimResult)
             };
 
             return claims;
         }
 
-        private static void RemoveUserClaims(ClaimsIdentity user)
+        private void RemoveUserClaims(ClaimsIdentity user)
         {
             var nClaim = user.FindFirst(ClaimTypes.Name);
 
             if (nClaim != null)
                 user.RemoveClaim(nClaim);
 
-            var aClaim = user.FindFirst(NodeAuthClaimType);
+            var aClaim = user.FindFirst(_cookieConstants.NodeAuthClaimType);
 
             if (aClaim != null)
                 user.RemoveClaim(aClaim);

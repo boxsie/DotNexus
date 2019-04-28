@@ -1,0 +1,48 @@
+﻿@using DotNexus.Core.Enums
+@model DotNexus.App.Models.CreateTokenViewModel
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="offset-sm-3 offset-lg-4 col-sm-6 col-lg-4">
+        <h1 class="mb-3">Create token</h1>
+
+        <form asp-controller="token" asp-action="create" method="post">
+            <div class="form-group">
+                <label asp-for="TokenType"></label>
+                <select asp-for="TokenType" asp-items="@Html.GetEnumSelectList(typeof(TokenType))" class="form-control">
+                    <option selected="selected" value="">Please select...</option>
+                </select>
+                <span asp-validation-for="TokenType"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Name"></label>
+                <input asp-for="Name" type="text" class="form-control" />
+                <span asp-validation-for="Name"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Identifier"></label>
+                <input asp-for="Identifier" type="text" class="form-control" />
+                <span asp-validation-for="Identifier"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TotalSupply"></label>
+                <input asp-for="TotalSupply" type="number" class="form-control" />
+                <span asp-validation-for="TotalSupply"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Pin"></label>
+                <input asp-for="Pin" type="number" class="form-control" />
+                <span asp-validation-for="Pin"></span>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Create token</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+

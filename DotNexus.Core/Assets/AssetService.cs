@@ -36,6 +36,8 @@ namespace DotNexus.Core.Assets
 
             asset.Address = response.Address;
             asset.TxId = response.TxId;
+            asset.Genesis = user.GenesisId.Genesis;
+            asset.CreatedOn = DateTime.Now;
 
             return asset;
         }
@@ -44,16 +46,17 @@ namespace DotNexus.Core.Assets
         {
             token.ThrowIfCancellationRequested();
 
-            asset.Validate();
+            if (string.IsNullOrWhiteSpace(asset?.Address))
+                throw new ArgumentException("Address is required");
 
-            var assetKeyVal = asset.GetKeyVal();
+            var (key, val) = asset.GetKeyVal();
 
-            var request = new NexusRequest(new Dictionary<string, string> {{assetKeyVal.Item1, assetKeyVal.Item2}});
+            var request = new NexusRequest(new Dictionary<string, string> {{key, val}});
 
             var assetInfo = await PostAsync<AssetInfo>("assets/get", request, token);
 
             if (assetInfo == null)
-                throw new InvalidOperationException($"{asset.Name} retrieval failed");
+                throw new InvalidOperationException($"{key} retrieval failed");
 
             return assetInfo;
         }
@@ -82,15 +85,15 @@ namespace DotNexus.Core.Assets
             asset.Validate();
             nexusToken.Validate();
 
-            var assetKeyVal = asset.GetKeyVal("asset_address", "asset_name");
-            var tokenKeyVal = nexusToken.GetKeyVal("token_address", "token_name");
+            var (aKey, aVal) = asset.GetKeyVal("asset_address", "asset_name");
+            var (tKey, tVal) = nexusToken.GetKeyVal("token_address", "token_name");
 
             var request = new NexusRequest(new Dictionary<string, string>
             {
                 {"pin", user.Pin.ToString()},
                 {"session", user.GenesisId.Session},
-                {assetKeyVal.Item1, assetKeyVal.Item2},
-                {tokenKeyVal.Item1, tokenKeyVal.Item2}
+                {aKey, aVal},
+                {tKey, tVal}
             });
 
             return await PostAsync<Asset>("assets/tokenize", request, token);
@@ -98,34 +101,38 @@ namespace DotNexus.Core.Assets
 
         public async Task<IEnumerable<AssetInfo>> GetAssetHistoryAsync(Asset asset, CancellationToken token = default)
         {
-            asset.Validate();
+            token.ThrowIfCancellationRequested();
 
-            var assetKeyVal = asset.GetKeyVal();
+            if (string.IsNullOrWhiteSpace(asset?.Address))
+                throw new ArgumentException("Address is required");
             
-            var request = new NexusRequest(new Dictionary<string, string> { { assetKeyVal.Item1, assetKeyVal.Item2 } });
+            var (key, val) = asset.GetKeyVal();
+            
+            var request = new NexusRequest(new Dictionary<string, string> { { key, val } });
 
             var assetHistory = await PostAsync<IEnumerable<AssetInfo>>("assets/history", request, token);
 
             if (assetHistory == null)
-                throw new InvalidOperationException($"Get asset {assetKeyVal.Item2} history failed");
+                throw new InvalidOperationException($"Get asset {val} history failed");
 
             return assetHistory;
         }
 
-        private async Task<Asset> TransferAssetAsync(Asset asset, NexusUser fromUser, (string, string) toUserKeyVal,
-            CancellationToken token = default)
+        private async Task<Asset> TransferAssetAsync(Asset asset, NexusUser fromUser, (string, string) toUserKeyVal, CancellationToken token = default)
         {
+            token.ThrowIfCancellationRequested();
+
             fromUser.Validate();
             asset.Validate();
 
-            var assetKeyVal = asset.GetKeyVal();
+            var (key, val) = asset.GetKeyVal();
 
             var request = new NexusRequest(new Dictionary<string, string>
             {
                 {"pin", fromUser.Pin.ToString()},
                 {"session", fromUser.GenesisId.Session},
                 {toUserKeyVal.Item1, toUserKeyVal.Item2},
-                {assetKeyVal.Item1, assetKeyVal.Item2}
+                {key, val}
             });
 
             var newId = await PostAsync<Asset>("assets/transfer", request, token);

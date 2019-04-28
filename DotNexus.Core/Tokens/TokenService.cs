@@ -50,12 +50,12 @@ namespace DotNexus.Core.Tokens
 
             token.Validate();
 
-            var keyVal = token.GetKeyVal();
+            var (key, val) = token.GetKeyVal();
 
             var request = new NexusRequest(new Dictionary<string, string>
             {
                 {"identifier", token.Identifier},
-                {keyVal.Item1, keyVal.Item2},
+                {key, val},
                 {"type", token.Type}
             });
 

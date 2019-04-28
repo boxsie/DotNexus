@@ -22,8 +22,7 @@ namespace DotNexus.Identity
             if (nexusUser == null)
             {
                 await context.HttpContext.SignOutAsync();
-                context.HttpContext.Response.Redirect("/");
-                return;
+                context.HttpContext.Response.Redirect("/node");
             }
         }
     }

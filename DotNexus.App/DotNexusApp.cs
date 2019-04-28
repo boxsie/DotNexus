@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Boxsie.Wrapplication;
+using Boxsie.Wrapplication.Config;
 
 namespace DotNexus.App
 {

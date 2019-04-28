@@ -7,4 +7,10 @@
         GenNextPrev = 3,
         PubKeySign = 4
     }
+
+    public enum TokenType
+    {
+        Register,
+        Account
+    }
 }

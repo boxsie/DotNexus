@@ -1,4 +1,6 @@
-﻿namespace DotNexus.Core.Tokens.Models
+﻿using DotNexus.Core.Enums;
+
+namespace DotNexus.Core.Tokens.Models
 {
     public abstract class Token
     {
@@ -8,6 +10,7 @@
         public string Tx { get; set; }
 
         public abstract string Type { get; }
+        public abstract int TypeId { get; }
 
         public (string, string) GetKeyVal(string addressKey = nameof(Address), string nameKey = nameof(Name))
         {

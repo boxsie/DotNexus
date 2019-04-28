@@ -2,6 +2,8 @@
 
 namespace Boxsie.Wrapplication.Config.Contracts
 {
+    public interface ICfg { }
+
     public interface IConfig
     {
         IUserConfig GetUserConfig();

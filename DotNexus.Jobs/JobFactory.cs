@@ -21,7 +21,7 @@ namespace DotNexus.Jobs
             _serviceFactory = serviceFactory;
         }
 
-        public async Task<BlockNotifyJob> CreateBlockNotifyJob(NexusNodeEndpoint endpoint, TimeSpan interval, Func<Block, Task> onNotify, CancellationToken token = default)
+        public async Task<BlockNotifyJob> CreateBlockNotifyJobAsync(NexusNodeEndpoint endpoint, TimeSpan interval, Func<Block, Task> onNotify, CancellationToken token = default)
         {
             var job = new BlockNotifyJob(
                 _loggerFactory.CreateLogger<BlockNotifyJob>(), 

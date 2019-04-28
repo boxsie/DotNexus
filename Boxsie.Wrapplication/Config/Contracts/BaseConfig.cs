@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Boxsie.Wrapplication.Config.Contracts
 {
-    public abstract class BaseConfig<T> : IConfig where T : IUserConfig, new()
+    public abstract class BaseConfig<T> : ICfg, IConfig where T : IUserConfig, new()
     {
         public string UserConfigFilename { get; set; }
 
@@ -19,6 +19,9 @@ namespace Boxsie.Wrapplication.Config.Contracts
 
         public async Task LoadUserConfigAsync(string appDataPath)
         {
+            if (string.IsNullOrWhiteSpace(UserConfigFilename))
+                return;
+
             var filePath = Path.Combine(appDataPath, UserConfigFilename);
 
             using (var js = new JsonStore<T>())
@@ -37,6 +40,9 @@ namespace Boxsie.Wrapplication.Config.Contracts
 
         public async Task LoadEncryptedUserConfigAsync(string appDataPath, string key)
         {
+            if (string.IsNullOrWhiteSpace(UserConfigFilename))
+                return;
+
             var filePath = Path.Combine(appDataPath, UserConfigFilename);
 
             using (var js = new EncryptedJsonStore<T>(key))

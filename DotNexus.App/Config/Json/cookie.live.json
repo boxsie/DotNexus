@@ -1,0 +1,8 @@
+﻿{
+  "NodeAuthClaimType": "NodeAuth",
+  "NodeAuthClaimResult": "Autherised",
+  "SessionIdKey": "SessionId",
+  "GenesisIdKey": "GenesisId",
+  "UsernameKey": "Username",
+  "NodeIdClaimType": "NodeId"
+}

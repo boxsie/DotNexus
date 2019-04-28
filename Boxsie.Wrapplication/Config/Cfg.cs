@@ -21,8 +21,8 @@ namespace Boxsie.Wrapplication.Config
         private static readonly string ConfigJsonPath = Path.Combine("Config", "Json");
 
         private static string _appDataPath;
-        private static ILogger<IConfig> _logger;
-        private static Dictionary<Type, IConfig> _configs;
+        private static ILogger<ICfg> _logger;
+        private static Dictionary<Type, ICfg> _configs;
         private static bool IsDebug
         {
             get
@@ -39,17 +39,17 @@ namespace Boxsie.Wrapplication.Config
         {
             _appDataPath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), ConfigJsonPath);
 
-            _configs = serviceProvider.GetServices<IConfig>().ToDictionary(x => x.GetType());
+            _configs = serviceProvider.GetServices<ICfg>().ToDictionary(x => x.GetType());
 
             if (!_configs.ContainsKey(typeof(GeneralConfig)))
                 throw new FileNotFoundException($"Could not find the Genral Config");
 
-            foreach (var cfgs in _configs.Values)
+            foreach (var cfgs in _configs.Values.Where(x => x is IConfig).Cast<IConfig>())
                 cfgs.LoadUserConfigAsync(_appDataPath).GetAwaiter().GetResult();
             
             var userDataPath = GetConfig<GeneralConfig>().UserConfig.UserDataPath;
 
-            _logger = serviceProvider.GetService<ILogger<IConfig>>();
+            _logger = serviceProvider.GetService<ILogger<ICfg>>();
             _logger.LogDebug($"Application data path set to {_appDataPath}");
             _logger.LogInformation($"General user data load complete");
             _logger.LogDebug($"User data path set to {userDataPath}");
@@ -62,7 +62,7 @@ namespace Boxsie.Wrapplication.Config
             Directory.CreateDirectory(userDataPath);
         }
 
-        public static T GetConfig<T>() where T : IConfig
+        public static T GetConfig<T>() where T : ICfg
         {
             var tType = typeof(T);
 
@@ -71,7 +71,7 @@ namespace Boxsie.Wrapplication.Config
 
             _logger.LogWarning($"Unable to get {tType}");
 
-            return default(T);
+            return default;
         }
 
         public static async Task<string> GetConfigJsonAsync(string configName)
@@ -114,16 +114,16 @@ namespace Boxsie.Wrapplication.Config
             }
         }
 
-        public static T ConfigFactory<T>(string name = null) where T : IConfig
+        public static T ConfigFactory<T>(string name = null) where T : ICfg
         {
             return (T)ConfigFactory(typeof(T), name);
         }
 
-        public static IConfig ConfigFactory(Type configType, string name = null)
+        public static ICfg ConfigFactory(Type configType, string name = null)
         {
             var configName = name ?? configType.Name.Replace("Config", "");
 
-            return (IConfig)JsonConvert.DeserializeObject(GetConfigJsonAsync(configName).GetAwaiter().GetResult(), configType);
+            return (ICfg)JsonConvert.DeserializeObject(GetConfigJsonAsync(configName).GetAwaiter().GetResult(), configType);
         }
     }
 }

@@ -46,10 +46,10 @@ namespace Boxsie.Wrapplication
 
         private static void AddConfigs(IServiceCollection services)
         {
-            services.AddSingleton<GeneralConfig>(x => Cfg.ConfigFactory<GeneralConfig>());
-            services.AddSingleton<IConfig, GeneralConfig>(x => x.GetService<GeneralConfig>());
+            services.AddSingleton(x => Cfg.ConfigFactory<GeneralConfig>());
+            services.AddSingleton<ICfg, GeneralConfig>(x => x.GetService<GeneralConfig>());
 
-            var contract = typeof(IConfig);
+            var contract = typeof(ICfg);
 
             var configTypes = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(x => x.GetTypes()

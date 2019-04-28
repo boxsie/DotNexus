@@ -46,6 +46,7 @@ namespace DotNexus.App.Controllers
             return View();
         }
 
+        [Route("/block/{blockId}")]
         public async Task<IActionResult> Block(string blockId)
         {
             var isHeight = int.TryParse(blockId, out var height);
@@ -66,6 +67,7 @@ namespace DotNexus.App.Controllers
             return View(block);
         }
 
+        [Route("/transaction/{hash}")]
         public async Task<IActionResult> Transaction(string hash)
         {
             var ledgerService = await _serviceFactory.GetAsync<LedgerService>(HttpContext);
@@ -74,6 +76,7 @@ namespace DotNexus.App.Controllers
             return View(tx);
         }
 
+        [Route("/genesis/{hash}")]
         public async Task<IActionResult> Genesis(string hash)
         {
             var genesisId = new GenesisId { Genesis = hash };
